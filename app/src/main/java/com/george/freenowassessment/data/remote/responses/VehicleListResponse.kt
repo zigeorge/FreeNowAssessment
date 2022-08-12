@@ -1,0 +1,51 @@
+package com.george.freenowassessment.data.remote.responses
+
+data class VehicleListResponse(
+    val poiList: List<Vehicle>
+)
+
+data class Vehicle(
+    val id: Long,
+    val coordinate: Coordinate,
+    val state: String,
+    val fleetType: String,
+    val heading: Double
+) {
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other?.javaClass != javaClass) return false
+        return other.hashCode() == hashCode()
+    }
+
+    override fun hashCode(): Int {
+        var result = id.hashCode()
+        result = 31 * result + coordinate.hashCode()
+        result = 31 * result + state.hashCode()
+        result = 31 * result + fleetType.hashCode()
+        result = 31 * result + heading.hashCode()
+        return result
+    }
+}
+
+data class Coordinate(
+    val latitude: Double,
+    val longitude: Double
+) {
+    override fun hashCode(): Int {
+        var result = latitude.hashCode()
+        result = 31 * result + longitude.hashCode()
+        return result
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as Coordinate
+
+        if (latitude != other.latitude) return false
+        if (longitude != other.longitude) return false
+
+        return true
+    }
+}
