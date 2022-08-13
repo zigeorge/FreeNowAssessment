@@ -3,22 +3,22 @@ package com.george.freenowassessment.ui
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.george.freenowassessment.databinding.FragmentVehicleBinding
-import com.george.freenowassessment.ui.presenter.VehicleListPresenter
+import com.george.freenowassessment.databinding.VehicleListItemBinding
+import com.george.freenowassessment.ui.vo.SingleVehicle
 
 /**
- * [RecyclerView.Adapter] that can display a [VehicleListPresenter.SingleVehicle].
+ * [RecyclerView.Adapter] that can display a [SingleVehicle].
  */
 class VehicleRecyclerViewAdapter :
-    ListAdapter<VehicleListPresenter.SingleVehicle,
+    PagingDataAdapter<SingleVehicle,
             VehicleRecyclerViewAdapter.ViewHolder>(VehicleDiff()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         return ViewHolder(
-            FragmentVehicleBinding.inflate(
+            VehicleListItemBinding.inflate(
                 LayoutInflater.from(parent.context),
                 parent,
                 false
@@ -28,21 +28,28 @@ class VehicleRecyclerViewAdapter :
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = getItem(position)
-        holder.vehicleType.text = item.type
-        holder.location.text = item.location
+        holder.vehicleType.text = item?.type
+        holder.address.text = item?.address
+        holder.state.text = item?.state
+        holder.itemView.setOnClickListener{
+            onItemClickListener?.let { click ->
+                click(item)
+            }
+        }
     }
 
-    /** item click listener with [VehicleListPresenter.SingleVehicle] as param */
-    private var onItemClickListener: ((VehicleListPresenter.SingleVehicle) -> Unit)? = null
+    /** item click listener with [SingleVehicle] as param */
+    private var onItemClickListener: ((SingleVehicle?) -> Unit)? = null
 
-    fun setOnItemClickListener(listener: (VehicleListPresenter.SingleVehicle) -> Unit) {
+    fun setOnItemClickListener(listener: (SingleVehicle?) -> Unit) {
         onItemClickListener = listener
     }
 
-    inner class ViewHolder(binding: FragmentVehicleBinding) :
+    inner class ViewHolder(binding: VehicleListItemBinding) :
         RecyclerView.ViewHolder(binding.root) {
         val vehicleType: TextView = binding.vehicleType
-        val location: TextView = binding.location
+        val address: TextView = binding.address
+        val state: TextView = binding.state
 
         override fun toString(): String {
             return super.toString() + " '" + vehicleType.text + "'"
@@ -50,17 +57,17 @@ class VehicleRecyclerViewAdapter :
     }
 }
 
-class VehicleDiff : DiffUtil.ItemCallback<VehicleListPresenter.SingleVehicle>() {
+class VehicleDiff : DiffUtil.ItemCallback<SingleVehicle>() {
     override fun areItemsTheSame(
-        oldItem: VehicleListPresenter.SingleVehicle,
-        newItem: VehicleListPresenter.SingleVehicle
+        oldItem: SingleVehicle,
+        newItem: SingleVehicle
     ): Boolean {
         return oldItem.vehicle.id == newItem.vehicle.id
     }
 
     override fun areContentsTheSame(
-        oldItem: VehicleListPresenter.SingleVehicle,
-        newItem: VehicleListPresenter.SingleVehicle
+        oldItem: SingleVehicle,
+        newItem: SingleVehicle
     ): Boolean {
         return oldItem == newItem
     }

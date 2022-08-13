@@ -8,7 +8,7 @@
         android:id="@+id/vehicleFragment"
         android:name="com.george.freenowassessment.ui.VehicleFragment"
         android:label="fragment_vehicle_list"
-        tools:layout="@layout/fragment_vehicle_list" >
+        tools:layout="@layout/vehicle_list_item" >
         <action
             android:id="@+id/action_vehicleFragment_to_mapsFragment"
             app:destination="@id/mapsFragment"

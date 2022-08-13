@@ -9,8 +9,11 @@ import com.george.freenowassessment.other.Constants.VEHICLE_TABLE
 @Entity(tableName = VEHICLE_TABLE)
 class Vehicle(
     var vehicleId: Long,
-    var coordinate: String,
+    var latitude: Double,
+    var longitude: Double,
+    var address: String,
     var type: String,
+    var state: String,
     var bound: String,
     var heading: Double,
     @PrimaryKey(autoGenerate = true)
@@ -25,8 +28,11 @@ class Vehicle(
 
     override fun hashCode(): Int {
         var result = vehicleId.hashCode()
-        result = 31 * result + coordinate.hashCode()
+        result = 31 * result + latitude.hashCode()
+        result = 31 * result + longitude.hashCode()
+        result = 31 * result + address.hashCode()
         result = 31 * result + type.hashCode()
+        result = 31 * result + state.hashCode()
         result = 31 * result + bound.hashCode()
         result = 31 * result + heading.hashCode()
         result = 31 * result + (id ?: 0)

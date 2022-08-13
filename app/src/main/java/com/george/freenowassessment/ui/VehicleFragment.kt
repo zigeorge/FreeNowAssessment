@@ -5,30 +5,48 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.george.freenowassessment.R
-import javax.inject.Inject
+import com.george.freenowassessment.databinding.FragmentVehicleBinding
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
 /**
- * A fragment representing a list of Items.
+ * A fragment representing a list of Vehicle.
  */
-class VehicleFragment : Fragment() {
+@AndroidEntryPoint
+class VehicleFragment : Fragment(R.layout.fragment_vehicle) {
 
-    @Inject lateinit var vehicleRecyclerViewAdapter: VehicleRecyclerViewAdapter
+    private val vehicleRecyclerViewAdapter = VehicleRecyclerViewAdapter()
+    private lateinit var viewModel: VehicleListViewModel
+
+    private var _binding: FragmentVehicleBinding? = null
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
+        inflater: LayoutInflater,
+        container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val view = inflater.inflate(R.layout.fragment_vehicle_list, container, false)
+        _binding = FragmentVehicleBinding.inflate(inflater, container, false)
+        return _binding?.root
+    }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        viewModel = ViewModelProvider(requireActivity())[VehicleListViewModel::class.java]
+        viewModel.loadVehicles()
         // Set the adapter
-        if (view is RecyclerView) {
-            with(view) {
-                layoutManager = LinearLayoutManager(context)
-                adapter = vehicleRecyclerViewAdapter
+        _binding?.list?.apply {
+            layoutManager = LinearLayoutManager(context)
+            adapter = vehicleRecyclerViewAdapter
+        }
+        lifecycleScope.launch {
+            viewModel.vehicleList.collectLatest {
+                vehicleRecyclerViewAdapter.submitData(it)
             }
         }
         vehicleRecyclerViewAdapter.setOnItemClickListener {
@@ -37,7 +55,6 @@ class VehicleFragment : Fragment() {
                     .actionVehicleFragmentToMapsFragment()
             )
         }
-        return view
     }
 
 }

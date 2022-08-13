@@ -3,7 +3,9 @@ package com.george.freenowassessment.ui
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import com.george.freenowassessment.databinding.ActivityMainBinding
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding

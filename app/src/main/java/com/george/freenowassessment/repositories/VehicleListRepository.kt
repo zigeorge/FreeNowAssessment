@@ -1,12 +1,17 @@
 package com.george.freenowassessment.repositories
 
-import androidx.lifecycle.LiveData
+import androidx.paging.PagingSource
+import com.george.freenowassessment.data.local.Vehicle
 import com.george.freenowassessment.data.remote.responses.Coordinate
-import com.george.freenowassessment.data.remote.responses.Vehicle
 
 interface VehicleListRepository {
-    suspend fun getVehicleList(
+    suspend fun loadVehicleList(
         coordinate1: Coordinate,
         coordinate2: Coordinate
-    ): List<Vehicle>?
+    )
+
+    fun getVehicleList(
+        coordinate1: Coordinate,
+        coordinate2: Coordinate
+    ): PagingSource<Int, Vehicle>
 }
