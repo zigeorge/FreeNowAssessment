@@ -9,7 +9,8 @@ object Constants {
 
     const val DB_NAME = "free_now_db"
 
-    const val PAGE_SIZE = 15
+    const val PAGE_SIZE = 10
+    const val MAX_SIZE = 30
 
     val coordinate1 = Coordinate(53.694865,9.757589)
     val coordinate2 = Coordinate(53.394655,10.099891)

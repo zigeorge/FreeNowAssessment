@@ -2,11 +2,10 @@ package com.george.freenowassessment.repositories
 
 import android.location.Geocoder
 import androidx.paging.PagingSource
+import com.george.freenowassessment.data.local.Vehicle
 import com.george.freenowassessment.data.local.VehicleDao
 import com.george.freenowassessment.data.remote.VehicleApi
-import com.george.freenowassessment.data.local.Vehicle
 import com.george.freenowassessment.data.remote.responses.Coordinate
-import com.george.freenowassessment.other.Constants
 import javax.inject.Inject
 
 
@@ -20,34 +19,30 @@ class VehicleListRepositoryImpl @Inject constructor(
         coordinate1: Coordinate,
         coordinate2: Coordinate
     ) {
-        val count = dao.getCount()
-        if (count == 0) {
-            val list = api.getVehicleList(
-                        coordinate1.latitude,
-                        coordinate1.longitude,
-                        coordinate2.latitude,
-                        coordinate2.longitude
-                    ).body()?.poiList ?: ArrayList()
-            if(list.isNotEmpty()) {
-//                val vehicles = ArrayList<Vehicle>()
-                val bound = coordinate1.toString()+coordinate2.toString()
-                for (vehicle in list) {
-                    dao.insert(
-                        Vehicle(
-                            vehicle.id,
-                            vehicle.coordinate.latitude,
-                            vehicle.coordinate.longitude,
-                            vehicle.coordinate.address(geocoder),
-                            vehicle.fleetType,
-                            vehicle.state,
-                            bound,
-                            vehicle.heading
-                        )
+        val list = api.getVehicleList(
+            coordinate1.latitude,
+            coordinate1.longitude,
+            coordinate2.latitude,
+            coordinate2.longitude
+        ).body()?.poiList ?: ArrayList()
+        if (list.isNotEmpty()) {
+            val vehicles = ArrayList<Vehicle>()
+            val bound = coordinate1.toString() + coordinate2.toString()
+            for (vehicle in list) {
+                vehicles.add(
+                    Vehicle(
+                        vehicle.id,
+                        vehicle.coordinate.latitude,
+                        vehicle.coordinate.longitude,
+                        vehicle.coordinate.address(geocoder),
+                        vehicle.fleetType,
+                        vehicle.state,
+                        bound,
+                        vehicle.heading
                     )
-
-                }
-//                dao.insertAll(vehicles)
+                )
             }
+            dao.insertAll(vehicles)
         }
     }
 
@@ -55,7 +50,7 @@ class VehicleListRepositoryImpl @Inject constructor(
         coordinate1: Coordinate,
         coordinate2: Coordinate
     ): PagingSource<Int, Vehicle> {
-        return dao.vehiclesInBound(coordinate1.toString()+coordinate2.toString())
+        return dao.vehiclesInBound(coordinate1.toString() + coordinate2.toString())
     }
 }
 

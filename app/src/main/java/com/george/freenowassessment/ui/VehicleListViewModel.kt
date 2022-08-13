@@ -3,6 +3,7 @@ package com.george.freenowassessment.ui
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.*
+import com.george.freenowassessment.other.Constants.MAX_SIZE
 import com.george.freenowassessment.other.Constants.PAGE_SIZE
 import com.george.freenowassessment.other.Constants.coordinate1
 import com.george.freenowassessment.other.Constants.coordinate2
@@ -22,8 +23,8 @@ class VehicleListViewModel @Inject constructor(
     val vehicleList: Flow<PagingData<SingleVehicle>> = Pager(
         config = PagingConfig(
             pageSize = PAGE_SIZE,
-            enablePlaceholders = true,
-            maxSize = 45
+            enablePlaceholders = false,
+            maxSize = MAX_SIZE
         )
     ) {
         repository.getVehicleList(coordinate1, coordinate2)
