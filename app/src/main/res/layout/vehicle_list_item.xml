@@ -31,7 +31,7 @@
         android:layout_marginTop="@dimen/_5sdp"
         android:text="ACTIVE"
         android:textAppearance="?attr/textAppearanceListItem"
-        android:textColor="@color/teal_700"
+        android:textColor="@color/colorPrimary"
         android:textSize="@dimen/_14sdp" />
 
 </LinearLayout>

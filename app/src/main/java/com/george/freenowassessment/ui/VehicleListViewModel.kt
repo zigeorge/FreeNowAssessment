@@ -23,7 +23,7 @@ class VehicleListViewModel @Inject constructor(
     val vehicleList: Flow<PagingData<SingleVehicle>> = Pager(
         config = PagingConfig(
             pageSize = PAGE_SIZE,
-            enablePlaceholders = false,
+            enablePlaceholders = true,
             maxSize = MAX_SIZE
         )
     ) {

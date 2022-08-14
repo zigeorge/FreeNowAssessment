@@ -16,7 +16,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 /**
- * A fragment representing a list of Vehicle.
+ * A fragment representing a list of VehicleData.
  */
 @AndroidEntryPoint
 class VehicleFragment : Fragment(R.layout.fragment_vehicle) {
@@ -38,7 +38,7 @@ class VehicleFragment : Fragment(R.layout.fragment_vehicle) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         viewModel = ViewModelProvider(requireActivity())[VehicleListViewModel::class.java]
-        viewModel.loadVehicles()
+
         // Set the adapter
         _binding?.list?.apply {
             layoutManager = LinearLayoutManager(context)

@@ -1,10 +1,10 @@
 package com.george.freenowassessment.data.remote.responses
 
 data class VehicleList(
-    val poiList: List<Vehicle>
+    val poiList: List<VehicleData>
 )
 
-data class Vehicle(
+data class VehicleData(
     val id: Long,
     val coordinate: Coordinate,
     val state: String,

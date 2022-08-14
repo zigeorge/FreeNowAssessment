@@ -1,5 +1,6 @@
 package com.george.freenowassessment.ui
 
+import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.TextView
@@ -30,7 +31,10 @@ class VehicleRecyclerViewAdapter :
         val item = getItem(position)
         holder.vehicleType.text = item?.type
         holder.address.text = item?.address
-        holder.state.text = item?.state
+        holder.state.apply {
+            text = item?.state
+            setTextColor(item?.stateColor() ?: Color.BLACK)
+        }
         holder.itemView.setOnClickListener{
             onItemClickListener?.let { click ->
                 click(item)
@@ -71,4 +75,10 @@ class VehicleDiff : DiffUtil.ItemCallback<SingleVehicle>() {
     ): Boolean {
         return oldItem == newItem
     }
+}
+
+fun SingleVehicle.stateColor(): Int {
+    return if(state == "ACTIVE") {
+        Color.parseColor("#008577")
+    } else Color.parseColor("#D81054")
 }

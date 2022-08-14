@@ -25,8 +25,7 @@ interface VehicleDao {
     @Query("SELECT * FROM vehicles WHERE bound = :bound")
     fun allVehiclesInBound(bound: String): Flow<List<Vehicle>>
 
-    @Query("SELECT COUNT(id) FROM vehicles")
-    suspend fun getCount(): Int
-
+    @Query("DELETE FROM vehicles")
+    suspend fun deleteAll()
 
 }

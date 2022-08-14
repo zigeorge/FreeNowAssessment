@@ -5,12 +5,15 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import com.george.freenowassessment.R
 import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
+import com.google.maps.android.ktx.awaitMap
 
 class MapsFragment : Fragment() {
 
@@ -37,7 +40,12 @@ class MapsFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val mapFragment = childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment?
-        mapFragment?.getMapAsync(callback)
+//        val mapFragment = childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment?
+//        mapFragment?.getMapAsync(callback)
+        lifecycleScope.launchWhenCreated {
+            val mapFragment: SupportMapFragment? =
+                childFragmentManager.findFragmentById(R.id.map) as? SupportMapFragment
+            val googleMap: GoogleMap? = mapFragment?.awaitMap()
+        }
     }
 }

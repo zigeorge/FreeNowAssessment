@@ -1,4 +1,8 @@
 <resources>
     <string name="app_name">FreeNowAssessment</string>
-    <string name="title_activity_maps">MapsActivity</string>
+    <string name="title_list">List</string>
+    <string name="title_map">Map</string>
+    <string name="cd_list">contains a list of vehicles</string>
+    <string name="cd_map">contains a map showing coordinates of available vehicles</string>
+    <string name="title_vehicle_list_fragment">Vehicle List</string>
 </resources>

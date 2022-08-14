@@ -6,6 +6,12 @@ import com.george.freenowassessment.data.local.Vehicle
 import com.george.freenowassessment.data.local.VehicleDao
 import com.george.freenowassessment.data.remote.VehicleApi
 import com.george.freenowassessment.data.remote.responses.Coordinate
+import com.george.freenowassessment.data.remote.responses.VehicleData
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 
@@ -19,6 +25,7 @@ class VehicleListRepositoryImpl @Inject constructor(
         coordinate1: Coordinate,
         coordinate2: Coordinate
     ) {
+        dao.deleteAll()
         val list = api.getVehicleList(
             coordinate1.latitude,
             coordinate1.longitude,
@@ -26,10 +33,16 @@ class VehicleListRepositoryImpl @Inject constructor(
             coordinate2.longitude
         ).body()?.poiList ?: ArrayList()
         if (list.isNotEmpty()) {
-            val vehicles = ArrayList<Vehicle>()
             val bound = coordinate1.toString() + coordinate2.toString()
+            storeVehicles(list, bound)
+        }
+    }
+
+    @OptIn(DelicateCoroutinesApi::class)
+    private suspend fun storeVehicles(list: List<VehicleData>, bound: String) {
+        GlobalScope.launch(Dispatchers.IO) {
             for (vehicle in list) {
-                vehicles.add(
+                dao.insert(
                     Vehicle(
                         vehicle.id,
                         vehicle.coordinate.latitude,
@@ -42,7 +55,6 @@ class VehicleListRepositoryImpl @Inject constructor(
                     )
                 )
             }
-            dao.insertAll(vehicles)
         }
     }
 
@@ -51,6 +63,13 @@ class VehicleListRepositoryImpl @Inject constructor(
         coordinate2: Coordinate
     ): PagingSource<Int, Vehicle> {
         return dao.vehiclesInBound(coordinate1.toString() + coordinate2.toString())
+    }
+
+    override fun getAllVehicle(
+        coordinate1: Coordinate,
+        coordinate2: Coordinate
+    ): Flow<List<Vehicle>> {
+        return dao.allVehiclesInBound(coordinate1.toString() + coordinate2.toString())
     }
 }
 

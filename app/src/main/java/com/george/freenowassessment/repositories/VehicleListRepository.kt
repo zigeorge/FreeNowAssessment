@@ -3,6 +3,7 @@ package com.george.freenowassessment.repositories
 import androidx.paging.PagingSource
 import com.george.freenowassessment.data.local.Vehicle
 import com.george.freenowassessment.data.remote.responses.Coordinate
+import kotlinx.coroutines.flow.Flow
 
 interface VehicleListRepository {
     suspend fun loadVehicleList(
@@ -14,4 +15,9 @@ interface VehicleListRepository {
         coordinate1: Coordinate,
         coordinate2: Coordinate
     ): PagingSource<Int, Vehicle>
+
+    fun getAllVehicle(
+        coordinate1: Coordinate,
+        coordinate2: Coordinate
+    ): Flow<List<Vehicle>>
 }
