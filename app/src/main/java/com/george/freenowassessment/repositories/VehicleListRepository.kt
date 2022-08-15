@@ -4,6 +4,7 @@ import androidx.paging.PagingSource
 import com.george.freenowassessment.data.local.Vehicle
 import com.george.freenowassessment.data.remote.responses.Coordinate
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharedFlow
 
 interface VehicleListRepository {
     suspend fun loadVehicleList(
