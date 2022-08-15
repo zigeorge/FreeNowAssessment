@@ -66,7 +66,7 @@ class VehicleDiff : DiffUtil.ItemCallback<SingleVehicle>() {
         oldItem: SingleVehicle,
         newItem: SingleVehicle
     ): Boolean {
-        return oldItem.vehicle.id == newItem.vehicle.id
+        return oldItem.vehicle.vehicleId == newItem.vehicle.vehicleId
     }
 
     override fun areContentsTheSame(

@@ -15,16 +15,13 @@ import kotlinx.coroutines.flow.SharedFlow
 interface VehicleDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertAll(vehicle: List<Vehicle>)
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(vehicle: Vehicle)
 
     @Query("SELECT * FROM vehicles WHERE bound = :bound")
     fun vehiclesInBound(bound: String): PagingSource<Int, Vehicle>
 
     @Query("SELECT * FROM vehicles WHERE bound = :bound")
-    fun allVehiclesInBound(bound: String): Flow<List<Vehicle>>
+        fun allVehiclesInBound(bound: String): Flow<List<Vehicle>>
 
     @Query("DELETE FROM vehicles")
     suspend fun deleteAll()

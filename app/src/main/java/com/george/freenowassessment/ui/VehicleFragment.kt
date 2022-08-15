@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
@@ -22,7 +23,7 @@ import kotlinx.coroutines.launch
 class VehicleFragment : Fragment(R.layout.fragment_vehicle) {
 
     private val vehicleRecyclerViewAdapter = VehicleRecyclerViewAdapter()
-    private lateinit var viewModel: VehicleListViewModel
+    private val viewModel by activityViewModels<VehicleListViewModel>()
 
     private var _binding: FragmentVehicleBinding? = null
 
@@ -37,7 +38,6 @@ class VehicleFragment : Fragment(R.layout.fragment_vehicle) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        viewModel = ViewModelProvider(requireActivity())[VehicleListViewModel::class.java]
 
         // Set the adapter
         _binding?.list?.apply {
@@ -49,11 +49,10 @@ class VehicleFragment : Fragment(R.layout.fragment_vehicle) {
                 vehicleRecyclerViewAdapter.submitData(it)
             }
         }
-        vehicleRecyclerViewAdapter.setOnItemClickListener {
-            findNavController().navigate(
-                VehicleFragmentDirections
-                    .actionVehicleFragmentToMapsFragment()
-            )
+        vehicleRecyclerViewAdapter.setOnItemClickListener { singleVehicle ->
+            singleVehicle?.let {
+                viewModel.onVehicleSelected(it)
+            }
         }
     }
 

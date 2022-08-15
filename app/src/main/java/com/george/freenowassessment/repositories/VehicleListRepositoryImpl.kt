@@ -7,6 +7,7 @@ import com.george.freenowassessment.data.local.VehicleDao
 import com.george.freenowassessment.data.remote.VehicleApi
 import com.george.freenowassessment.data.remote.responses.Coordinate
 import com.george.freenowassessment.data.remote.responses.VehicleData
+import com.george.freenowassessment.ui.vo.Address
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -48,7 +49,7 @@ class VehicleListRepositoryImpl @Inject constructor(
                         vehicle.id,
                         vehicle.coordinate.latitude,
                         vehicle.coordinate.longitude,
-                        vehicle.coordinate.address(geocoder),
+                        vehicle.coordinate.address(geocoder).toJson(),
                         vehicle.fleetType,
                         vehicle.state,
                         bound,
@@ -74,13 +75,10 @@ class VehicleListRepositoryImpl @Inject constructor(
     }
 }
 
-fun Coordinate.address(geocoder: Geocoder): String {
+fun Coordinate.address(geocoder: Geocoder): Address {
     val addresses = geocoder.getFromLocation(
         latitude,
         longitude, 1
     )
-    return "${addresses[0].getAddressLine(0)}, " +
-            "${addresses[0].locality}, ${addresses[0].adminArea}, " +
-            "${addresses[0].countryName}, ${addresses[0].postalCode}, " +
-            addresses[0].featureName
+    return Address(addresses[0].featureName, addresses[0].getAddressLine(0))
 }

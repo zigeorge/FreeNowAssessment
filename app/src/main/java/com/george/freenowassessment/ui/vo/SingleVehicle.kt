@@ -4,6 +4,7 @@ import android.location.Geocoder
 import com.george.freenowassessment.data.local.Vehicle
 import com.george.freenowassessment.data.remote.responses.Coordinate
 import com.george.freenowassessment.other.Constants.coordinate1
+import com.google.gson.Gson
 import java.util.ArrayList
 import javax.inject.Inject
 
@@ -13,7 +14,7 @@ import javax.inject.Inject
 class SingleVehicle(val vehicle: Vehicle) {
     val type: String = vehicle.type
     val state: String = vehicle.state
-    val address: String = vehicle.address
+    val address: String = vehicle.address.toAddress().addressLine
 
 
     /** matches an [other] object of [Any] type with [SingleVehicle] */
@@ -27,4 +28,19 @@ class SingleVehicle(val vehicle: Vehicle) {
         return vehicle.hashCode()
     }
 
+}
+
+data class Address(val name: String, val addressLine: String) {
+
+    override fun toString(): String {
+        return "$name $addressLine"
+    }
+
+    fun toJson(): String {
+        return Gson().toJson(this)
+    }
+}
+
+fun String.toAddress(): Address {
+    return Gson().fromJson(this, Address::class.java)
 }

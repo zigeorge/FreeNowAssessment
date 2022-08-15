@@ -8,13 +8,7 @@
         android:id="@+id/vehicleFragment"
         android:name="com.george.freenowassessment.ui.VehicleFragment"
         android:label="@string/title_vehicle_list_fragment"
-        tools:layout="@layout/vehicle_list_item" >
-        <action
-            android:id="@+id/action_vehicleFragment_to_mapsFragment"
-            app:destination="@id/mapsFragment"
-            app:enterAnim="@android:anim/slide_in_left"
-            app:exitAnim="@android:anim/slide_out_right" />
-    </fragment>
+        tools:layout="@layout/vehicle_list_item" />
     <fragment
         android:id="@+id/mapsFragment"
         android:name="com.george.freenowassessment.ui.MapsFragment"

@@ -10,6 +10,9 @@ import com.george.freenowassessment.other.Constants.coordinate1
 import com.george.freenowassessment.other.Constants.coordinate2
 import com.george.freenowassessment.repositories.VehicleListRepository
 import com.george.freenowassessment.ui.vo.SingleVehicle
+import com.george.freenowassessment.ui.vo.VehicleMarker
+import com.george.freenowassessment.ui.vo.toAddress
+import com.google.android.gms.maps.model.LatLng
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -18,12 +21,15 @@ import javax.inject.Inject
 @HiltViewModel
 class VehicleListViewModel @Inject constructor(
     private val repository: VehicleListRepository
-): ViewModel() {
+) : ViewModel() {
 
-    private val _allVehicles = MutableSharedFlow<List<Vehicle>>()
+    private val _allVehicles = MutableSharedFlow<List<VehicleMarker>>(replay = 5)
     val allVehicles = _allVehicles.asSharedFlow()
 
-    val vehicleList: Flow<PagingData<SingleVehicle>> = Pager(
+    private val _vehicleSelected = MutableSharedFlow<VehicleMarker>(replay = 2)
+    val vehicleSelected = _vehicleSelected.asSharedFlow()
+
+    val vehicleList: SharedFlow<PagingData<SingleVehicle>> = Pager(
         config = PagingConfig(
             pageSize = PAGE_SIZE,
             enablePlaceholders = true,
@@ -38,7 +44,7 @@ class VehicleListViewModel @Inject constructor(
                 SingleVehicle(vehicle)
             }
     }
-        .cachedIn(viewModelScope)
+        .cachedIn(viewModelScope) as SharedFlow<PagingData<SingleVehicle>>
 
     fun loadVehicles() {
         viewModelScope.launch {
@@ -48,8 +54,30 @@ class VehicleListViewModel @Inject constructor(
 
     fun getAllVehiclesToShowMarkerInMap() {
         viewModelScope.launch {
-            _allVehicles.emitAll(repository.getAllVehicle(coordinate1, coordinate2))
+            repository.getAllVehicle(coordinate1, coordinate2).collect{
+                val vehicleMarkers = ArrayList<VehicleMarker>()
+                it.forEach { vehicle ->
+                    vehicleMarkers.add(vehicle.toVehicleMarker())
+                }
+                _allVehicles.emit(vehicleMarkers)
+            }
         }
     }
 
+    fun onVehicleSelected(singleVehicle: SingleVehicle) {
+        viewModelScope.launch {
+            _vehicleSelected.emit(singleVehicle.vehicle.toVehicleMarker())
+        }
+    }
+}
+
+fun Vehicle.toVehicleMarker(): VehicleMarker {
+    return VehicleMarker(
+        address.toAddress().name,
+        type,
+        LatLng(latitude, longitude),
+        address.toAddress().addressLine,
+        heading,
+        state
+    )
 }
