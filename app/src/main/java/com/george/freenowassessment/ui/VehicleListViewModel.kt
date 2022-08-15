@@ -26,10 +26,10 @@ class VehicleListViewModel @Inject constructor(
     private val _allVehicles = MutableSharedFlow<List<VehicleMarker>>(replay = 5)
     val allVehicles = _allVehicles.asSharedFlow()
 
-    private val _vehicleSelected = MutableSharedFlow<VehicleMarker>(replay = 2)
+    private val _vehicleSelected = MutableSharedFlow<VehicleMarker?>(replay = 1)
     val vehicleSelected = _vehicleSelected.asSharedFlow()
 
-    val vehicleList: SharedFlow<PagingData<SingleVehicle>> = Pager(
+    val vehicleList: Flow<PagingData<SingleVehicle>> = Pager(
         config = PagingConfig(
             pageSize = PAGE_SIZE,
             enablePlaceholders = true,
@@ -44,7 +44,7 @@ class VehicleListViewModel @Inject constructor(
                 SingleVehicle(vehicle)
             }
     }
-        .cachedIn(viewModelScope) as SharedFlow<PagingData<SingleVehicle>>
+        .cachedIn(viewModelScope)
 
     fun loadVehicles() {
         viewModelScope.launch {
@@ -64,9 +64,13 @@ class VehicleListViewModel @Inject constructor(
         }
     }
 
-    fun onVehicleSelected(singleVehicle: SingleVehicle) {
+    fun onVehicleSelected(singleVehicle: SingleVehicle?) {
         viewModelScope.launch {
-            _vehicleSelected.emit(singleVehicle.vehicle.toVehicleMarker())
+            singleVehicle?.let {
+                _vehicleSelected.emit(it.vehicle.toVehicleMarker())
+            } ?: run {
+                _vehicleSelected.emit(null)
+            }
         }
     }
 }

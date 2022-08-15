@@ -6,32 +6,20 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.george.freenowassessment.R
-import com.george.freenowassessment.data.local.Vehicle
-import com.george.freenowassessment.data.remote.responses.Coordinate
 import com.george.freenowassessment.databinding.FragmentMapsBinding
-import com.george.freenowassessment.other.BitmapHelper
-import com.george.freenowassessment.other.Constants.coordinate1
-import com.george.freenowassessment.other.Constants.coordinate2
 import com.george.freenowassessment.ui.vo.VehicleMarker
 import com.george.freenowassessment.ui.vo.VehicleMarkerRenderer
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
-import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
-import com.google.android.gms.maps.model.BitmapDescriptor
-import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
-import com.google.android.gms.maps.model.MarkerOptions
 import com.google.maps.android.clustering.ClusterManager
 import com.google.maps.android.ktx.awaitMap
 import com.google.maps.android.ktx.awaitMapLoad
-import kotlinx.coroutines.flow.collect
 
 class MapsFragment : Fragment() {
 
@@ -52,11 +40,12 @@ class MapsFragment : Fragment() {
     @SuppressLint("PotentialBehaviorOverride")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        lifecycleScope.launchWhenCreated {
+        lifecycleScope.launchWhenStarted {
             val mapFragment: SupportMapFragment? =
                 childFragmentManager.findFragmentById(R.id.map) as? SupportMapFragment
             val googleMap: GoogleMap? = mapFragment?.awaitMap()
             val bounds = LatLngBounds.builder()
+            googleMap?.awaitMapLoad()
             googleMap?.setInfoWindowAdapter(MarkerInfoWindowAdapter(requireContext()))
             viewModel.allVehicles.collect { vehicleMarkers ->
                 googleMap?.let { map ->
@@ -67,18 +56,21 @@ class MapsFragment : Fragment() {
                     bounds.include(it.latLng)
                 }
                 Log.e("SIZE", vehicleMarkers.size.toString())
-                googleMap?.awaitMapLoad()
-                googleMap?.moveCamera(
-                    CameraUpdateFactory.newLatLngBounds(
-                        bounds.build(), 100
-                    )
-                )
-                viewModel.vehicleSelected.collect { selectedVehicle ->
+                if (vehicleMarkers.isNotEmpty()) {
                     googleMap?.moveCamera(
-                        CameraUpdateFactory.newLatLngZoom(
-                            selectedVehicle.latLng, 100f
+                        CameraUpdateFactory.newLatLngBounds(
+                            bounds.build(), 100
                         )
                     )
+                }
+                viewModel.vehicleSelected.collect { selectedVehicle ->
+                    selectedVehicle?.let {
+                        googleMap?.moveCamera(
+                            CameraUpdateFactory.newLatLngZoom(
+                                selectedVehicle.latLng, 50f
+                            )
+                        )
+                    }
                 }
             }
         }
@@ -120,8 +112,9 @@ class MapsFragment : Fragment() {
             clusterManager.clusterMarkerCollection.markers.forEach { it.alpha = 0.3f }
         }
     }
-}
 
-fun Coordinate.latLng(): LatLng {
-    return LatLng(latitude, longitude)
+    override fun onPause() {
+        super.onPause()
+        viewModel.onVehicleSelected(null)
+    }
 }

@@ -2,8 +2,10 @@ package com.george.freenowassessment.ui
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
@@ -14,6 +16,9 @@ import com.george.freenowassessment.R
 import com.george.freenowassessment.databinding.ActivityMainBinding
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
@@ -48,8 +53,8 @@ class MainActivity : AppCompatActivity() {
         )
         setupActionBarWithNavController(navController, appBarConfiguration)
 
-        lifecycleScope.launchWhenStarted {
-            viewModel.vehicleSelected.collect {
+        collectLifeCycleFlow(viewModel.vehicleSelected) { vehicleMarker ->
+            vehicleMarker?.let {
                 binding.bottomNav.selectedItemId = R.id.mapsFragment
             }
         }
@@ -57,5 +62,13 @@ class MainActivity : AppCompatActivity() {
 
     override fun onSupportNavigateUp(): Boolean {
         return navController.navigateUp(appBarConfiguration)
+    }
+}
+
+fun <T> AppCompatActivity.collectLifeCycleFlow(flow: Flow<T>, collect: suspend (T) -> Unit) {
+    lifecycleScope.launch {
+        repeatOnLifecycle(Lifecycle.State.STARTED) {
+            flow.collectLatest(collect)
+        }
     }
 }

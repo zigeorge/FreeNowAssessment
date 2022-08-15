@@ -14,6 +14,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
+import okio.IOException
 import javax.inject.Inject
 
 
@@ -76,9 +77,15 @@ class VehicleListRepositoryImpl @Inject constructor(
 }
 
 fun Coordinate.address(geocoder: Geocoder): Address {
-    val addresses = geocoder.getFromLocation(
-        latitude,
-        longitude, 1
-    )
-    return Address(addresses[0].featureName, addresses[0].getAddressLine(0))
+    return try {
+        val addresses = geocoder.getFromLocation(
+            latitude,
+            longitude, 1
+        )
+        Address(addresses[0].featureName, addresses[0].getAddressLine(0))
+    } catch (ex: IOException) {
+        Address("Unknown", "Unknown")
+    } catch (ex: Exception) {
+        Address("Unknown", "Unknown")
+    }
 }
