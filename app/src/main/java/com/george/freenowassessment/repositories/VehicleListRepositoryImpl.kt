@@ -1,6 +1,7 @@
 package com.george.freenowassessment.repositories
 
 import android.location.Geocoder
+import android.util.Log
 import androidx.paging.PagingSource
 import com.george.freenowassessment.data.local.Vehicle
 import com.george.freenowassessment.data.local.VehicleDao
@@ -36,6 +37,7 @@ class VehicleListRepositoryImpl @Inject constructor(
             coordinate2.longitude
         ).body()?.poiList ?: ArrayList()
         if (list.isNotEmpty()) {
+            Log.e("SIZE", list.size.toString())
             val bound = coordinate1.toString() + coordinate2.toString()
             storeVehicles(list, bound)
         }

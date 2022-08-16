@@ -1,16 +1,20 @@
-package com.george.freenowassessment.ui
+package com.george.freenowassessment.ui.fragments
 
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.george.freenowassessment.R
 import com.george.freenowassessment.databinding.FragmentVehicleBinding
+import com.george.freenowassessment.ui.VehicleListViewModel
+import com.george.freenowassessment.ui.adapters.VehicleRecyclerViewAdapter
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
 /**
  * A fragment representing a list of VehicleData.
@@ -40,15 +44,11 @@ class VehicleFragment : Fragment(R.layout.fragment_vehicle) {
             layoutManager = LinearLayoutManager(context)
             adapter = vehicleRecyclerViewAdapter
         }
-        (activity as AppCompatActivity)
-            .collectLifeCycleFlow(viewModel.vehicleList) {
+        lifecycleScope.launch {
+            viewModel.vehicleList.collectLatest {
                 vehicleRecyclerViewAdapter.submitData(it)
             }
-//        lifecycleScope.launch {
-//            viewModel.vehicleList.collectLatest {
-//                vehicleRecyclerViewAdapter.submitData(it)
-//            }
-//        }
+        }
         vehicleRecyclerViewAdapter.setOnItemClickListener { singleVehicle ->
             singleVehicle?.let {
                 viewModel.onVehicleSelected(it)

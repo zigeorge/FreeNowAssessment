@@ -33,8 +33,6 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         viewModel = ViewModelProvider(this)[VehicleListViewModel::class.java]
-        viewModel.loadVehicles()
-        viewModel.getAllVehiclesToShowMarkerInMap()
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 

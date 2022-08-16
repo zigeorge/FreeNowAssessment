@@ -1,4 +1,4 @@
-package com.george.freenowassessment.ui
+package com.george.freenowassessment.ui.adapters
 
 import android.graphics.Color
 import android.view.LayoutInflater

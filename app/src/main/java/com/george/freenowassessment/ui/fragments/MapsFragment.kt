@@ -1,4 +1,4 @@
-package com.george.freenowassessment.ui
+package com.george.freenowassessment.ui.fragments
 
 import android.annotation.SuppressLint
 import android.os.Bundle
@@ -11,6 +11,8 @@ import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import com.george.freenowassessment.R
 import com.george.freenowassessment.databinding.FragmentMapsBinding
+import com.george.freenowassessment.ui.VehicleListViewModel
+import com.george.freenowassessment.ui.adapters.MarkerInfoWindowAdapter
 import com.george.freenowassessment.ui.vo.VehicleMarker
 import com.george.freenowassessment.ui.vo.VehicleMarkerRenderer
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -37,41 +39,54 @@ class MapsFragment : Fragment() {
         return _binding?.root
     }
 
-    @SuppressLint("PotentialBehaviorOverride")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        lifecycleScope.launchWhenStarted {
-            val mapFragment: SupportMapFragment? =
-                childFragmentManager.findFragmentById(R.id.map) as? SupportMapFragment
-            val googleMap: GoogleMap? = mapFragment?.awaitMap()
-            val bounds = LatLngBounds.builder()
-            googleMap?.awaitMapLoad()
-            googleMap?.setInfoWindowAdapter(MarkerInfoWindowAdapter(requireContext()))
-            viewModel.allVehicles.collect { vehicleMarkers ->
-                googleMap?.let { map ->
-                    addClusteredMarkers(map, vehicleMarkers)
-                }
+        lifecycleScope.launchWhenCreated {
+            val googleMap = configureGoogleMap()
+            setMarkersForAllVehicles(googleMap)
+            setMapToShowSelectedVehicle(googleMap)
+        }
+    }
 
-                vehicleMarkers.forEach {
-                    bounds.include(it.latLng)
-                }
-                Log.e("SIZE", vehicleMarkers.size.toString())
-                if (vehicleMarkers.isNotEmpty()) {
-                    googleMap?.moveCamera(
-                        CameraUpdateFactory.newLatLngBounds(
-                            bounds.build(), 100
-                        )
+    @SuppressLint("PotentialBehaviorOverride")
+    private suspend fun configureGoogleMap(): GoogleMap? {
+        val mapFragment: SupportMapFragment? =
+            childFragmentManager.findFragmentById(R.id.map) as? SupportMapFragment
+        val googleMap: GoogleMap? = mapFragment?.awaitMap()
+        googleMap?.awaitMapLoad()
+        googleMap?.setInfoWindowAdapter(MarkerInfoWindowAdapter(requireContext()))
+        return googleMap
+    }
+
+    private suspend fun setMarkersForAllVehicles(googleMap: GoogleMap?) {
+        viewModel.allVehicles.collect { vehicleMarkers ->
+            googleMap?.let { map ->
+                addClusteredMarkers(map, vehicleMarkers)
+            }
+
+            val bounds = LatLngBounds.builder()
+            vehicleMarkers.forEach {
+                bounds.include(it.latLng)
+            }
+            Log.e("SIZE","BOUND "+vehicleMarkers.size)
+            if (vehicleMarkers.isNotEmpty()) {
+                googleMap?.moveCamera(
+                    CameraUpdateFactory.newLatLngBounds(
+                        bounds.build(), 100
                     )
-                }
-                viewModel.vehicleSelected.collect { selectedVehicle ->
-                    selectedVehicle?.let {
-                        googleMap?.moveCamera(
-                            CameraUpdateFactory.newLatLngZoom(
-                                selectedVehicle.latLng, 50f
-                            )
-                        )
-                    }
-                }
+                )
+            }
+        }
+    }
+
+    private suspend fun setMapToShowSelectedVehicle(googleMap: GoogleMap?) {
+        viewModel.vehicleSelected.collect { selectedVehicle ->
+            selectedVehicle?.let {
+                googleMap?.moveCamera(
+                    CameraUpdateFactory.newLatLngZoom(
+                        selectedVehicle.latLng, 50f
+                    )
+                )
             }
         }
     }

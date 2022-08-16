@@ -10,7 +10,7 @@ import com.george.freenowassessment.other.Constants.BASE_URL
 import com.george.freenowassessment.other.Constants.DB_NAME
 import com.george.freenowassessment.repositories.VehicleListRepository
 import com.george.freenowassessment.repositories.VehicleListRepositoryImpl
-import com.george.freenowassessment.ui.VehicleRecyclerViewAdapter
+import com.george.freenowassessment.ui.adapters.VehicleRecyclerViewAdapter
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
