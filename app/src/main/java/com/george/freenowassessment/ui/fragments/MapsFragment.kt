@@ -22,12 +22,17 @@ import com.google.android.gms.maps.model.LatLngBounds
 import com.google.maps.android.clustering.ClusterManager
 import com.google.maps.android.ktx.awaitMap
 import com.google.maps.android.ktx.awaitMapLoad
+import kotlinx.coroutines.flow.collectLatest
 
 class MapsFragment : Fragment() {
 
     private val viewModel by activityViewModels<VehicleListViewModel>()
 
     private var _binding: FragmentMapsBinding? = null
+
+    private var googleMap: GoogleMap? = null
+
+    private var showingSingleVehicle: Boolean = false
 
 
     override fun onCreateView(
@@ -42,9 +47,11 @@ class MapsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         lifecycleScope.launchWhenCreated {
-            val googleMap = configureGoogleMap()
-            setMarkersForAllVehicles(googleMap)
-            setMapToShowSelectedVehicle(googleMap)
+            googleMap = configureGoogleMap()
+            setMarkersForAllVehicles()
+        }
+        lifecycleScope.launchWhenResumed {
+            setMapToShowSelectedVehicle()
         }
     }
 
@@ -52,24 +59,22 @@ class MapsFragment : Fragment() {
     private suspend fun configureGoogleMap(): GoogleMap? {
         val mapFragment: SupportMapFragment? =
             childFragmentManager.findFragmentById(R.id.map) as? SupportMapFragment
-        val googleMap: GoogleMap? = mapFragment?.awaitMap()
+        googleMap = mapFragment?.awaitMap()
         googleMap?.awaitMapLoad()
         googleMap?.setInfoWindowAdapter(MarkerInfoWindowAdapter(requireContext()))
         return googleMap
     }
 
-    private suspend fun setMarkersForAllVehicles(googleMap: GoogleMap?) {
-        viewModel.allVehicles.collect { vehicleMarkers ->
+    private suspend fun setMarkersForAllVehicles() {
+        viewModel.allVehicles.collectLatest { vehicleMarkers ->
             googleMap?.let { map ->
                 addClusteredMarkers(map, vehicleMarkers)
             }
-
             val bounds = LatLngBounds.builder()
             vehicleMarkers.forEach {
                 bounds.include(it.latLng)
             }
-            Log.e("SIZE","BOUND "+vehicleMarkers.size)
-            if (vehicleMarkers.isNotEmpty()) {
+            if (vehicleMarkers.isNotEmpty() && !showingSingleVehicle) {
                 googleMap?.moveCamera(
                     CameraUpdateFactory.newLatLngBounds(
                         bounds.build(), 100
@@ -79,9 +84,10 @@ class MapsFragment : Fragment() {
         }
     }
 
-    private suspend fun setMapToShowSelectedVehicle(googleMap: GoogleMap?) {
+    private suspend fun setMapToShowSelectedVehicle() {
         viewModel.vehicleSelected.collect { selectedVehicle ->
             selectedVehicle?.let {
+                showingSingleVehicle = true
                 googleMap?.moveCamera(
                     CameraUpdateFactory.newLatLngZoom(
                         selectedVehicle.latLng, 50f
@@ -131,5 +137,6 @@ class MapsFragment : Fragment() {
     override fun onPause() {
         super.onPause()
         viewModel.onVehicleSelected(null)
+        googleMap?.clear()
     }
 }
