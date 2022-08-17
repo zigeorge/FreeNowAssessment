@@ -6,7 +6,6 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.SharedFlow
 
 /**
  * [VehicleDB] access object
@@ -21,9 +20,12 @@ interface VehicleDao {
     fun vehiclesInBound(bound: String): PagingSource<Int, Vehicle>
 
     @Query("SELECT * FROM vehicles WHERE bound = :bound")
-        fun allVehiclesInBound(bound: String): Flow<List<Vehicle>>
+    fun allVehiclesInBound(bound: String): Flow<List<Vehicle>>
 
     @Query("DELETE FROM vehicles")
     suspend fun deleteAll()
+
+    @Query("SELECT COUNT(id) FROM vehicles")
+    fun countVehicles(): Int
 
 }

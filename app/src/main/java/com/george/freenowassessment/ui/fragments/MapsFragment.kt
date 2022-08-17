@@ -1,8 +1,6 @@
 package com.george.freenowassessment.ui.fragments
 
-import android.annotation.SuppressLint
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,6 +9,9 @@ import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import com.george.freenowassessment.R
 import com.george.freenowassessment.databinding.FragmentMapsBinding
+import com.george.freenowassessment.other.Constants.coordinate1
+import com.george.freenowassessment.other.Constants.coordinate2
+import com.george.freenowassessment.other.latLng
 import com.george.freenowassessment.ui.VehicleListViewModel
 import com.george.freenowassessment.ui.adapters.MarkerInfoWindowAdapter
 import com.george.freenowassessment.ui.vo.VehicleMarker
@@ -32,7 +33,7 @@ class MapsFragment : Fragment() {
 
     private var googleMap: GoogleMap? = null
 
-    private var showingSingleVehicle: Boolean = false
+    private var selectedVehicle: VehicleMarker? = null
 
 
     override fun onCreateView(
@@ -55,44 +56,39 @@ class MapsFragment : Fragment() {
         }
     }
 
-    @SuppressLint("PotentialBehaviorOverride")
     private suspend fun configureGoogleMap(): GoogleMap? {
         val mapFragment: SupportMapFragment? =
             childFragmentManager.findFragmentById(R.id.map) as? SupportMapFragment
         googleMap = mapFragment?.awaitMap()
         googleMap?.awaitMapLoad()
-        googleMap?.setInfoWindowAdapter(MarkerInfoWindowAdapter(requireContext()))
         return googleMap
     }
 
-    private suspend fun setMarkersForAllVehicles() {
-        viewModel.allVehicles.collectLatest { vehicleMarkers ->
-            googleMap?.let { map ->
-                addClusteredMarkers(map, vehicleMarkers)
-            }
+    private fun setLatLngBound() {
+        lifecycleScope.launchWhenResumed {
             val bounds = LatLngBounds.builder()
-            vehicleMarkers.forEach {
-                bounds.include(it.latLng)
-            }
-            if (vehicleMarkers.isNotEmpty() && !showingSingleVehicle) {
-                googleMap?.moveCamera(
-                    CameraUpdateFactory.newLatLngBounds(
-                        bounds.build(), 100
-                    )
+            bounds.include(coordinate1.latLng())
+            bounds.include(coordinate2.latLng())
+            googleMap?.animateCamera(
+                CameraUpdateFactory.newLatLngBounds(
+                    bounds.build(), 10
                 )
-            }
+            )
+        }
+    }
+
+    private suspend fun setMarkersForAllVehicles() {
+        // Zooming the map to a bound then selected bound before clustering
+        setLatLngBound()
+        viewModel.allVehicles.collectLatest { vehicleMarkers ->
+            addClusteredMarkers(vehicleMarkers)
         }
     }
 
     private suspend fun setMapToShowSelectedVehicle() {
-        viewModel.vehicleSelected.collect { selectedVehicle ->
-            selectedVehicle?.let {
-                showingSingleVehicle = true
-                googleMap?.moveCamera(
-                    CameraUpdateFactory.newLatLngZoom(
-                        selectedVehicle.latLng, 50f
-                    )
-                )
+        viewModel.vehicleSelected.collect {
+            it?.let {
+                selectedVehicle = it
             }
         }
     }
@@ -100,43 +96,50 @@ class MapsFragment : Fragment() {
     /**
      * Adds markers to the map with clustering support.
      */
-    private fun addClusteredMarkers(googleMap: GoogleMap, vehicleMarkers: List<VehicleMarker>) {
+    private fun addClusteredMarkers(vehicleMarkers: List<VehicleMarker>) {
         // Create the ClusterManager class and set the custom renderer.
         val clusterManager = ClusterManager<VehicleMarker>(requireContext(), googleMap)
-        clusterManager.renderer =
-            VehicleMarkerRenderer(
-                requireContext(),
-                googleMap,
-                clusterManager
+        googleMap?.let { map ->
+            clusterManager.renderer =
+                VehicleMarkerRenderer(
+                    requireContext(),
+                    map,
+                    clusterManager
+                )
+
+            // Set custom info window adapter
+            clusterManager.markerCollection.setInfoWindowAdapter(
+                MarkerInfoWindowAdapter(
+                    requireContext()
+                )
             )
 
-        // Set custom info window adapter
-        clusterManager.markerCollection.setInfoWindowAdapter(MarkerInfoWindowAdapter(requireContext()))
+            // Add the places to the ClusterManager.
+            clusterManager.addItems(vehicleMarkers)
+            clusterManager.cluster()
 
-        // Add the places to the ClusterManager.
-        clusterManager.addItems(vehicleMarkers)
-        clusterManager.cluster()
-
-        // Set ClusterManager as the OnCameraIdleListener so that it
-        // can re-cluster when zooming in and out.
-        googleMap.setOnCameraIdleListener {
-            // When the camera stops moving, change the alpha value back to opaque.
-            clusterManager.markerCollection.markers.forEach { it.alpha = 1.0f }
-            clusterManager.clusterMarkerCollection.markers.forEach { it.alpha = 1.0f }
-            // Call clusterManager.onCameraIdle() when the camera stops moving so that re-clustering
-            // can be performed when the camera stops moving.
-            clusterManager.onCameraIdle()
+            // Set ClusterManager as the OnCameraIdleListener so that it
+            // can re-cluster when zooming in and out.
+            map.setOnCameraIdleListener {
+                // When the camera stops moving, change the alpha value back to opaque.
+                clusterManager.markerCollection.markers.forEach { it.alpha = 1.0f }
+                clusterManager.clusterMarkerCollection.markers.forEach { it.alpha = 1.0f }
+                // Call clusterManager.onCameraIdle() when the camera stops moving so that re-clustering
+                // can be performed when the camera stops moving.
+                clusterManager.onCameraIdle()
+            }
+            // When the camera starts moving, change the alpha value of the marker to translucent.
+            map.setOnCameraMoveStartedListener {
+                clusterManager.markerCollection.markers.forEach { it.alpha = 0.3f }
+                clusterManager.clusterMarkerCollection.markers.forEach { it.alpha = 0.3f }
+            }
+            selectedVehicle?.let { selectedVehicle->
+                vehicleMarkers.forEach {
+                    if (it.id == selectedVehicle.id) {
+                        map.animateCamera(CameraUpdateFactory.newLatLngZoom(it.latLng, 20f))
+                    }
+                }
+            }
         }
-        // When the camera starts moving, change the alpha value of the marker to translucent.
-        googleMap.setOnCameraMoveStartedListener {
-            clusterManager.markerCollection.markers.forEach { it.alpha = 0.3f }
-            clusterManager.clusterMarkerCollection.markers.forEach { it.alpha = 0.3f }
-        }
-    }
-
-    override fun onPause() {
-        super.onPause()
-        viewModel.onVehicleSelected(null)
-        googleMap?.clear()
     }
 }

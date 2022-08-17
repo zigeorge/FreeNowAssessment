@@ -8,10 +8,14 @@ import com.george.freenowassessment.other.Constants.MAX_SIZE
 import com.george.freenowassessment.other.Constants.PAGE_SIZE
 import com.george.freenowassessment.other.Constants.coordinate1
 import com.george.freenowassessment.other.Constants.coordinate2
+import com.george.freenowassessment.other.exceptions.UnableToLoadException
+import com.george.freenowassessment.other.exceptions.UnableToUpdateException
+import com.george.freenowassessment.other.toAddress
+import com.george.freenowassessment.other.toVehicleMarker
 import com.george.freenowassessment.repositories.VehicleListRepository
+import com.george.freenowassessment.ui.vo.ErrorState
 import com.george.freenowassessment.ui.vo.SingleVehicle
 import com.george.freenowassessment.ui.vo.VehicleMarker
-import com.george.freenowassessment.ui.vo.toAddress
 import com.google.android.gms.maps.model.LatLng
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
@@ -23,16 +27,15 @@ class VehicleListViewModel @Inject constructor(
     private val repository: VehicleListRepository
 ) : ViewModel() {
 
-    init {
-        loadVehicles()
-        getAllVehiclesToShowMarkerInMap()
-    }
-
-    private val _allVehicles = MutableSharedFlow<List<VehicleMarker>>(replay = 5)
+    //TODO: check for network connectivity
+    private val _allVehicles = MutableSharedFlow<List<VehicleMarker>>()
     val allVehicles = _allVehicles.asSharedFlow()
 
-    private val _vehicleSelected = MutableSharedFlow<VehicleMarker?>(replay = 1)
-    val vehicleSelected = _vehicleSelected.asSharedFlow()
+    private val _vehicleSelected = MutableStateFlow<VehicleMarker?>(null)
+    val vehicleSelected = _vehicleSelected.asStateFlow()
+
+    private val _shouldShowError = MutableSharedFlow<ErrorState>()
+    val shouldShowError = _shouldShowError.asSharedFlow()
 
     val vehicleList: SharedFlow<PagingData<SingleVehicle>> = Pager(
         config = PagingConfig(
@@ -51,15 +54,24 @@ class VehicleListViewModel @Inject constructor(
     }
         .cachedIn(viewModelScope) as SharedFlow<PagingData<SingleVehicle>>
 
-    private fun loadVehicles() {
+    fun loadVehicles() {
         viewModelScope.launch {
-            repository.loadVehicleList(coordinate1, coordinate2)
+            try {
+                repository.loadVehicleList(coordinate1, coordinate2)
+                getAllVehiclesToShowMarkerInMap()
+            } catch (ex: Exception) {
+                when (ex) {
+                    UnableToUpdateException::class.java ->
+                        _shouldShowError.emit(ErrorState.UNABLE_TO_UPDATE)
+                    else -> _shouldShowError.emit(ErrorState.UNABLE_TO_LOAD)
+                }
+            }
         }
     }
 
     private fun getAllVehiclesToShowMarkerInMap() {
         viewModelScope.launch {
-            repository.getAllVehicle(coordinate1, coordinate2).collect{
+            repository.getAllVehicle(coordinate1, coordinate2).collect {
                 val vehicleMarkers = ArrayList<VehicleMarker>()
                 it.forEach { vehicle ->
                     vehicleMarkers.add(vehicle.toVehicleMarker())
@@ -69,24 +81,15 @@ class VehicleListViewModel @Inject constructor(
         }
     }
 
-    fun onVehicleSelected(singleVehicle: SingleVehicle?) {
+    fun onVehicleSelected(singleVehicle: SingleVehicle) {
         viewModelScope.launch {
-            singleVehicle?.let {
-                _vehicleSelected.emit(it.vehicle.toVehicleMarker())
-            } ?: run {
-                _vehicleSelected.emit(null)
+            singleVehicle.let {
+                _vehicleSelected.value = it.vehicle.toVehicleMarker()
             }
         }
     }
-}
 
-fun Vehicle.toVehicleMarker(): VehicleMarker {
-    return VehicleMarker(
-        address.toAddress().name,
-        type,
-        LatLng(latitude, longitude),
-        address.toAddress().addressLine,
-        heading,
-        state
-    )
+    fun removeVehicleSelection() {
+        _vehicleSelected.value = null
+    }
 }

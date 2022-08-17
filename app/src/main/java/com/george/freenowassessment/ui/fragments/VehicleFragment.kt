@@ -44,10 +44,14 @@ class VehicleFragment : Fragment(R.layout.fragment_vehicle) {
             layoutManager = LinearLayoutManager(context)
             adapter = vehicleRecyclerViewAdapter
         }
-        lifecycleScope.launch {
+        lifecycleScope.launchWhenResumed {
             viewModel.vehicleList.collectLatest {
                 vehicleRecyclerViewAdapter.submitData(it)
             }
+        }
+        /** to clear selection from [VehicleListViewModel] when returned from [MapsFragment]*/
+        lifecycleScope.launchWhenResumed {
+            viewModel.removeVehicleSelection()
         }
         vehicleRecyclerViewAdapter.setOnItemClickListener { singleVehicle ->
             singleVehicle?.let {

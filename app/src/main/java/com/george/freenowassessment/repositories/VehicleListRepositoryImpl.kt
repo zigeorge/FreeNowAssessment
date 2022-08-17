@@ -2,20 +2,22 @@ package com.george.freenowassessment.repositories
 
 import android.location.Geocoder
 import android.util.Log
+import androidx.core.content.res.ResourcesCompat
 import androidx.paging.PagingSource
 import com.george.freenowassessment.data.local.Vehicle
 import com.george.freenowassessment.data.local.VehicleDao
 import com.george.freenowassessment.data.remote.VehicleApi
 import com.george.freenowassessment.data.remote.responses.Coordinate
 import com.george.freenowassessment.data.remote.responses.VehicleData
-import com.george.freenowassessment.ui.vo.Address
+import com.george.freenowassessment.other.address
+import com.george.freenowassessment.other.exceptions.UnableToLoadException
+import com.george.freenowassessment.other.exceptions.UnableToUpdateException
+import com.george.freenowassessment.other.toJson
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
-import okio.IOException
 import javax.inject.Inject
 
 
@@ -29,22 +31,41 @@ class VehicleListRepositoryImpl @Inject constructor(
         coordinate1: Coordinate,
         coordinate2: Coordinate
     ) {
-        dao.deleteAll()
-        val list = api.getVehicleList(
-            coordinate1.latitude,
-            coordinate1.longitude,
-            coordinate2.latitude,
-            coordinate2.longitude
-        ).body()?.poiList ?: ArrayList()
-        if (list.isNotEmpty()) {
-            Log.e("SIZE", list.size.toString())
-            val bound = coordinate1.toString() + coordinate2.toString()
-            storeVehicles(list, bound)
+        // TODO: refactor to work on existing data
+        // TODO: handle socket timeout
+        // TODO: handle format exception
+        // TODO: handle other exception
+        try {
+            /** deleting all [Vehicle] in local DB before getting new [VehicleData] from API*/
+            dao.deleteAll()
+            val list = api.getVehicleList(
+                coordinate1.latitude,
+                coordinate1.longitude,
+                coordinate2.latitude,
+                coordinate2.longitude
+            ).body()?.poiList ?: ArrayList()
+            if (list.isNotEmpty()) {
+                // TODO: Remove log
+                Log.e("SIZE", list.size.toString())
+                /** @bound is used to store each vehicle data so that the system
+                 * can be scaled for a different bound */
+                val bound = coordinate1.toString() + coordinate2.toString()
+                storeVehicles(list, bound)
+            }
+        } catch (ex: Exception) {
+            val count = dao.countVehicles()
+            if (count > 0) {
+                throw UnableToUpdateException("Unable to update new data")
+            }
+            throw UnableToLoadException("Unable to load new data")
         }
     }
 
+    /** A separate coroutine to insert [VehicleData] in local db*/
     @OptIn(DelicateCoroutinesApi::class)
     private suspend fun storeVehicles(list: List<VehicleData>, bound: String) {
+        // GlobalScope is used to run the insert operation in different dispatcher as
+        // getting address from geocoder blocks the main thread otherwise
         GlobalScope.launch(Dispatchers.IO) {
             for (vehicle in list) {
                 dao.insert(
@@ -75,19 +96,5 @@ class VehicleListRepositoryImpl @Inject constructor(
         coordinate2: Coordinate
     ): Flow<List<Vehicle>> {
         return dao.allVehiclesInBound(coordinate1.toString() + coordinate2.toString())
-    }
-}
-
-fun Coordinate.address(geocoder: Geocoder): Address {
-    return try {
-        val addresses = geocoder.getFromLocation(
-            latitude,
-            longitude, 1
-        )
-        Address(addresses[0].featureName, addresses[0].getAddressLine(0))
-    } catch (ex: IOException) {
-        Address("Unknown", "Unknown")
-    } catch (ex: Exception) {
-        Address("Unknown", "Unknown")
     }
 }

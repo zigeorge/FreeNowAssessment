@@ -1,12 +1,7 @@
 package com.george.freenowassessment.ui.vo
 
-import android.location.Geocoder
 import com.george.freenowassessment.data.local.Vehicle
-import com.george.freenowassessment.data.remote.responses.Coordinate
-import com.george.freenowassessment.other.Constants.coordinate1
-import com.google.gson.Gson
-import java.util.ArrayList
-import javax.inject.Inject
+import com.george.freenowassessment.other.toAddress
 
 /**
  * [SingleVehicle] representing information of a [Vehicle]
@@ -35,12 +30,4 @@ data class Address(val name: String, val addressLine: String) {
     override fun toString(): String {
         return "$name $addressLine"
     }
-
-    fun toJson(): String {
-        return Gson().toJson(this)
-    }
-}
-
-fun String.toAddress(): Address {
-    return Gson().fromJson(this, Address::class.java)
 }

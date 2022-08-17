@@ -8,6 +8,7 @@ import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.george.freenowassessment.databinding.VehicleListItemBinding
+import com.george.freenowassessment.other.stateColor
 import com.george.freenowassessment.ui.vo.SingleVehicle
 
 /**
@@ -75,10 +76,4 @@ class VehicleDiff : DiffUtil.ItemCallback<SingleVehicle>() {
     ): Boolean {
         return oldItem == newItem
     }
-}
-
-fun SingleVehicle.stateColor(): Int {
-    return if(state == "ACTIVE") {
-        Color.parseColor("#008577")
-    } else Color.parseColor("#D81054")
 }

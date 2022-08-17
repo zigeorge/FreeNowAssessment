@@ -53,15 +53,4 @@ data class Coordinate(
         return "${latitude}_${longitude}"
     }
 
-    companion object {
-        fun fromString(string: String): Coordinate? {
-            val split = string.split("_")
-            return try {
-                Coordinate(split[0].toDouble(), split[1].toDouble())
-            } catch (ex: NumberFormatException) {
-                null
-            }
-        }
-    }
-
 }

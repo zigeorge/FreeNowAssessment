@@ -5,4 +5,8 @@
     <string name="cd_list">contains a list of vehicles</string>
     <string name="cd_map">contains a map showing coordinates of available vehicles</string>
     <string name="title_vehicle_list_fragment">Vehicle List</string>
+    <string name="cd_fab">Floating action button to change list or map view</string>
+    <string name="failed_to_load">Failed to load data</string>
+    <string name="retry">Retry</string>
+    <string name="exit">Exit</string>
 </resources>

@@ -7,7 +7,8 @@
         <entry key="..\:/George/workspace/FreeNowAssessment/app/src/main/res/layout/fragment_maps.xml" value="0.16145833333333334" />
         <entry key="..\:/George/workspace/FreeNowAssessment/app/src/main/res/layout/fragment_vehicle.xml" value="0.17552083333333332" />
         <entry key="..\:/George/workspace/FreeNowAssessment/app/src/main/res/layout/fragment_vehicle_list.xml" value="0.16145833333333334" />
-        <entry key="..\:/George/workspace/FreeNowAssessment/app/src/main/res/layout/vehicle_list_item.xml" value="0.17552083333333332" />
+        <entry key="app/src/main/res/drawable/ic_list.xml" value="0.245" />
+        <entry key="app/src/main/res/drawable/ic_map.xml" value="0.245" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.34322916666666664" />
         <entry key="app/src/main/res/layout/fragment_vehicle.xml" value="0.16875" />
         <entry key="app/src/main/res/layout/fragment_vehicle_list.xml" value="0.17435897435897435" />
