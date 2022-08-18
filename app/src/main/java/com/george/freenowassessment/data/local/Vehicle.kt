@@ -13,6 +13,7 @@ import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import okhttp3.internal.toImmutableList
 
 /** [Vehicle] entity for Room DB */
 @Entity(tableName = VEHICLE_TABLE)
@@ -64,7 +65,8 @@ class Vehicle(
 }
 
 @OptIn(DelicateCoroutinesApi::class)
-class VehicleList(val vehicles: ArrayList<Vehicle>) {
+class VehicleList {
+    var vehicles = ArrayList<Vehicle>()
 
     fun hasVehicle(id: Long): Boolean {
         vehicles.forEach {
@@ -85,7 +87,7 @@ class VehicleList(val vehicles: ArrayList<Vehicle>) {
     fun update(data: VehicleData, geocoder: Geocoder) {
         // GlobalScope is used to run the insert operation in IO dispatcher as
         // getting address from geocoder blocks the main thread otherwise
-        GlobalScope.launch(Dispatchers.IO) {
+//        GlobalScope.launch(Dispatchers.IO) {
             val vehicle = getVehicle(data.id)
             vehicle?.let {
                 it.latitude = data.coordinate.latitude
@@ -94,7 +96,7 @@ class VehicleList(val vehicles: ArrayList<Vehicle>) {
                 it.state = data.state
                 it.heading = data.heading
             }
-        }
+//        }
     }
 
     fun deactivateAll() {
@@ -103,10 +105,18 @@ class VehicleList(val vehicles: ArrayList<Vehicle>) {
         }
     }
 
+    fun add(list: List<VehicleData>, geocoder: Geocoder, bound: String) {
+        list.forEach {
+            add(it, geocoder, bound)
+        }
+    }
+
+    fun add(list: List<Vehicle>) {
+        vehicles.addAll(list.toTypedArray())
+    }
+
     fun add(data: VehicleData, geocoder: Geocoder, bound: String) {
-        // GlobalScope is used to run the insert operation in IO dispatcher as
-        // getting address from geocoder blocks the main thread otherwise
-        GlobalScope.launch(Dispatchers.IO) {
+
             vehicles.add(
                 Vehicle(
                     data.id,
@@ -119,6 +129,6 @@ class VehicleList(val vehicles: ArrayList<Vehicle>) {
                     data.heading
                 )
             )
-        }
+
     }
 }

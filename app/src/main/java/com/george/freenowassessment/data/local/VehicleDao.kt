@@ -26,7 +26,7 @@ interface VehicleDao {
     fun vehiclesInFlow(bound: String, state: String): Flow<List<Vehicle>>
 
     @Query("SELECT * FROM vehicles WHERE bound = :bound")
-    fun allVehicles(bound: String): List<Vehicle>
+    suspend fun allVehicles(bound: String): List<Vehicle>
 
     @Query("DELETE FROM vehicles WHERE bound = :bound")
     suspend fun deleteAll(bound: String)
