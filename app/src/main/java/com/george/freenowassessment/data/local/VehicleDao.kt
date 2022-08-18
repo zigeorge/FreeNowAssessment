@@ -1,10 +1,7 @@
 package com.george.freenowassessment.data.local
 
 import androidx.paging.PagingSource
-import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.OnConflictStrategy
-import androidx.room.Query
+import androidx.room.*
 import kotlinx.coroutines.flow.Flow
 
 /**
@@ -25,13 +22,19 @@ interface VehicleDao {
     @Query("SELECT * FROM vehicles WHERE bound = :bound AND state = :state")
     fun vehiclesInFlow(bound: String, state: String): Flow<List<Vehicle>>
 
-    @Query("SELECT * FROM vehicles WHERE bound = :bound")
-    suspend fun allVehicles(bound: String): List<Vehicle>
-
     @Query("DELETE FROM vehicles WHERE bound = :bound")
     suspend fun deleteAll(bound: String)
 
     @Query("SELECT COUNT(id) FROM vehicles WHERE bound = :bound AND state = :state")
     suspend fun countVehicles(bound: String, state: String): Int
+
+    @Update
+    suspend fun updateVehicle(vehicle: Vehicle)
+
+    @Query("SELECT * FROM vehicles WHERE vehicleId = :vehicleId")
+    suspend fun getVehicle(vehicleId: Long): Vehicle?
+
+    @Query("UPDATE vehicles SET state = :state WHERE bound = :bound")
+    suspend fun deactivateAll(state: String, bound: String)
 
 }

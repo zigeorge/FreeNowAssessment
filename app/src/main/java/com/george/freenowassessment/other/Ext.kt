@@ -15,6 +15,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.george.freenowassessment.data.local.Vehicle
 import com.george.freenowassessment.data.remote.responses.Coordinate
+import com.george.freenowassessment.data.remote.responses.VehicleData
 import com.george.freenowassessment.ui.vo.Address
 import com.george.freenowassessment.ui.vo.SingleVehicle
 import com.george.freenowassessment.ui.vo.VehicleMarker
@@ -141,18 +142,18 @@ fun VehicleMarker.getMarker(carIcon: BitmapDescriptor): MarkerOptions {
         .rotation(heading.toFloat())
 }
 
-fun Context.checkNetworkConnection(): Boolean {
-    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-        val networkRequest = NetworkRequest.Builder()
-            .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
-            .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
-            .addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR)
-            .build()
-        networkRequest.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
-    } else {
-        val cm = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        val nInfo = cm.activeNetworkInfo
-        return nInfo != null && nInfo.isAvailable && nInfo.isConnected
-    }
-
+/**
+ * create [Vehicle] from [VehicleData]
+ * */
+fun VehicleData.getVehicle(geocoder: Geocoder, bound: String): Vehicle {
+    return Vehicle(
+        id,
+        coordinate.latitude,
+        coordinate.longitude,
+        coordinate.address(geocoder).toJson(),
+        fleetType,
+        state,
+        bound,
+        heading
+    )
 }

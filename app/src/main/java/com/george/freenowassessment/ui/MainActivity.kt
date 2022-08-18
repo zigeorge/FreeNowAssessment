@@ -10,12 +10,15 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
 import com.george.freenowassessment.R
 import com.george.freenowassessment.databinding.ActivityMainBinding
 import com.george.freenowassessment.other.collectLifeCycleFlow
 import com.george.freenowassessment.other.connectivity.ConnectivityObserver
 import com.george.freenowassessment.other.showDialog
 import com.george.freenowassessment.other.exceptions.ErrorState
+import com.george.freenowassessment.repositories.VehicleDataStoreWorker
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -35,6 +38,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        startLoadingVehicles()
         viewModel = ViewModelProvider(this)[VehicleListViewModel::class.java]
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -56,7 +60,7 @@ class MainActivity : AppCompatActivity() {
 
         binding.retry.setOnClickListener {
             binding.errorLayout.visibility = View.GONE
-            viewModel.loadVehicles()
+            startLoadingVehicles()
         }
 
         /** check for selected vehicle */
@@ -75,6 +79,12 @@ class MainActivity : AppCompatActivity() {
         collectLifeCycleFlow(connectivityObserver.observe()) {
             networkState = it
         }
+    }
+
+    private fun startLoadingVehicles() {
+        val request = OneTimeWorkRequestBuilder<VehicleDataStoreWorker>().build()
+        WorkManager.getInstance(applicationContext)
+            .enqueue(request)
     }
 
     /**
@@ -102,7 +112,7 @@ class MainActivity : AppCompatActivity() {
                 positiveText = getString(R.string.retry),
                 negativeText = getString(R.string.exit),
                 positiveAction = { _, _ ->
-                    viewModel.loadVehicles()
+                    startLoadingVehicles()
                 },
                 negativeAction = { _, _ ->
                     finish()
@@ -112,7 +122,7 @@ class MainActivity : AppCompatActivity() {
                 getString(R.string.failed_to_connect),
                 positiveText = getString(R.string.retry),
                 positiveAction = { _, _ ->
-                    viewModel.loadVehicles()
+                    startLoadingVehicles()
                 }
             )
         }

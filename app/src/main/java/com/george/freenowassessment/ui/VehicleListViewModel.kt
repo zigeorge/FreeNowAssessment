@@ -27,11 +27,10 @@ class VehicleListViewModel @Inject constructor(
 ) : ViewModel() {
 
     init {
-        loadVehicles()
+//        loadVehicles()
         getAllVehiclesToShowMarkerInMap()
     }
 
-    //TODO: check for network connectivity
     private val _allVehicles = MutableSharedFlow<List<VehicleMarker>>(replay = 5)
     val allVehicles = _allVehicles.asSharedFlow()
 

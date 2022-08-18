@@ -10,6 +10,7 @@ import com.george.freenowassessment.other.Constants.BASE_URL
 import com.george.freenowassessment.other.Constants.DB_NAME
 import com.george.freenowassessment.other.connectivity.ConnectivityObserver
 import com.george.freenowassessment.other.connectivity.NetworkConnectivityObserver
+import com.george.freenowassessment.repositories.VehicleDataSource
 import com.george.freenowassessment.repositories.VehicleListRepository
 import com.george.freenowassessment.repositories.VehicleListRepositoryImpl
 import com.george.freenowassessment.ui.adapters.VehicleRecyclerViewAdapter
@@ -57,11 +58,18 @@ object Module {
 
     @Singleton
     @Provides
+    fun provideVehicleDataManager(
+        api: VehicleApi,
+        dao: VehicleDao,
+        geocoder: Geocoder
+    ) = VehicleDataSource(api, dao, geocoder)
+
+    @Singleton
+    @Provides
     fun provideRepository(
         dao: VehicleDao,
-        api: VehicleApi,
-        geocoder: Geocoder
-    ) = VehicleListRepositoryImpl(api, dao, geocoder) as VehicleListRepository
+        vehicleDataSource: VehicleDataSource
+    ) = VehicleListRepositoryImpl(dao, vehicleDataSource) as VehicleListRepository
 
     @Singleton
     @Provides
