@@ -77,12 +77,12 @@ fun AppCompatActivity.showDialog(
     negativeText: String,
     positiveAction: (DialogInterface, Int) -> Unit,
     negativeAction: (DialogInterface, Int) -> Unit
-): AlertDialog {
+) {
     val alertDialogBuilder = AlertDialog.Builder(this)
     alertDialogBuilder.setMessage(message)
     alertDialogBuilder.setPositiveButton(positiveText, positiveAction)
     alertDialogBuilder.setNegativeButton(negativeText, negativeAction)
-    return alertDialogBuilder.create()
+    alertDialogBuilder.create().show()
 }
 
 fun SingleVehicle.stateColor(): Int {

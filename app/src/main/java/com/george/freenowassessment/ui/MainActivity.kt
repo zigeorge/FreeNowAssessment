@@ -1,6 +1,7 @@
 package com.george.freenowassessment.ui
 
 import android.os.Bundle
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
@@ -32,17 +33,6 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        /** loadVehicles to show in list/map */
-        viewModel.loadVehicles()
-
-        /** check for error to handle */
-        collectLifeCycleFlow(viewModel.shouldShowError) {
-            when(it) {
-                ErrorState.UNABLE_TO_LOAD -> errorDialog.show()
-                else -> {}//TODO set view to show unable to update
-            }
-        }
-
         val navHostFragment = supportFragmentManager.findFragmentById(
             R.id.nav_host_fragment
         ) as NavHostFragment
@@ -58,20 +48,34 @@ class MainActivity : AppCompatActivity() {
         )
         setupActionBarWithNavController(navController, appBarConfiguration)
 
+        binding.retry.setOnClickListener {
+            binding.errorLayout.visibility = View.GONE
+            viewModel.loadVehicles()
+        }
+
+        /** check for selected vehicle */
         collectLifeCycleFlow(viewModel.vehicleSelected) { vehicleMarker ->
             vehicleMarker?.let {
                 binding.bottomNav.selectedItemId = R.id.mapsFragment
             }
         }
-    }
 
-    private fun handleException(ex: Exception) {
-        when(ex) {
-
+        /** check for error to handle */
+        collectLifeCycleFlow(viewModel.shouldShowError) {
+            handleErrorState(it)
         }
     }
 
-    private val errorDialog =
+    private fun handleErrorState(errorState: ErrorState) {
+        when(errorState) {
+            ErrorState.UNABLE_TO_LOAD -> errorDialog()
+            else -> {
+                binding.errorLayout.visibility = View.VISIBLE
+            }
+        }
+    }
+
+    private fun errorDialog() {
         showDialog(
             getString(R.string.failed_to_load),
             getString(R.string.retry),
@@ -83,6 +87,7 @@ class MainActivity : AppCompatActivity() {
                 finish()
             }
         )
+    }
 
     override fun onSupportNavigateUp(): Boolean {
         return navController.navigateUp(appBarConfiguration)

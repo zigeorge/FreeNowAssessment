@@ -8,15 +8,12 @@ import com.george.freenowassessment.other.Constants.MAX_SIZE
 import com.george.freenowassessment.other.Constants.PAGE_SIZE
 import com.george.freenowassessment.other.Constants.coordinate1
 import com.george.freenowassessment.other.Constants.coordinate2
-import com.george.freenowassessment.other.exceptions.UnableToLoadException
 import com.george.freenowassessment.other.exceptions.UnableToUpdateException
-import com.george.freenowassessment.other.toAddress
 import com.george.freenowassessment.other.toVehicleMarker
 import com.george.freenowassessment.repositories.VehicleListRepository
 import com.george.freenowassessment.ui.vo.ErrorState
 import com.george.freenowassessment.ui.vo.SingleVehicle
 import com.george.freenowassessment.ui.vo.VehicleMarker
-import com.google.android.gms.maps.model.LatLng
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -26,6 +23,11 @@ import javax.inject.Inject
 class VehicleListViewModel @Inject constructor(
     private val repository: VehicleListRepository
 ) : ViewModel() {
+
+    init {
+        loadVehicles()
+        getAllVehiclesToShowMarkerInMap()
+    }
 
     //TODO: check for network connectivity
     private val _allVehicles = MutableSharedFlow<List<VehicleMarker>>()
@@ -47,7 +49,7 @@ class VehicleListViewModel @Inject constructor(
         repository.getVehicleList(coordinate1, coordinate2)
     }.flow.map { pagingData ->
         pagingData
-            // Map cheeses to common UI model.
+            /** Map [Vehicle] to [SingleVehicle].*/
             .map { vehicle ->
                 SingleVehicle(vehicle)
             }
@@ -58,7 +60,6 @@ class VehicleListViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 repository.loadVehicleList(coordinate1, coordinate2)
-                getAllVehiclesToShowMarkerInMap()
             } catch (ex: Exception) {
                 when (ex) {
                     UnableToUpdateException::class.java ->
