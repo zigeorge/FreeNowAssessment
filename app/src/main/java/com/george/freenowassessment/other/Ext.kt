@@ -1,8 +1,13 @@
 package com.george.freenowassessment.other
 
+import android.content.Context
 import android.content.DialogInterface
 import android.graphics.Color
 import android.location.Geocoder
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
+import android.net.NetworkRequest
+import android.os.Build
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Lifecycle
@@ -13,7 +18,10 @@ import com.george.freenowassessment.data.remote.responses.Coordinate
 import com.george.freenowassessment.ui.vo.Address
 import com.george.freenowassessment.ui.vo.SingleVehicle
 import com.george.freenowassessment.ui.vo.VehicleMarker
+import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.model.BitmapDescriptor
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.MarkerOptions
 import com.google.gson.Gson
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
@@ -39,8 +47,10 @@ fun <T> AppCompatActivity.collectLifeCycleFlow(flow: Flow<T>, collect: suspend (
     }
 }
 
-/** function to get [Address] from [Coordinate]
- * @param geocoder is a given android APi to get address from latitude and longitude */
+/**
+ *  function to get [Address] from [Coordinate]
+ * @param geocoder is a given android APi to get address from latitude and longitude
+ * */
 fun Coordinate.address(geocoder: Geocoder): Address {
     return try {
         val addresses = geocoder.getFromLocation(
@@ -55,10 +65,9 @@ fun Coordinate.address(geocoder: Geocoder): Address {
     }
 }
 
-fun Coordinate.latLng(): LatLng {
-    return LatLng(latitude, longitude)
-}
-
+/**
+ * create [VehicleMarker] from db entity [Vehicle]
+ * */
 fun Vehicle.toVehicleMarker(): VehicleMarker {
     return VehicleMarker(
         vehicleId,
@@ -71,22 +80,79 @@ fun Vehicle.toVehicleMarker(): VehicleMarker {
     )
 }
 
+/**
+ * Create and show [AlertDialog] in [AppCompatActivity]
+ * */
 fun AppCompatActivity.showDialog(
     message: String,
-    positiveText: String,
-    negativeText: String,
-    positiveAction: (DialogInterface, Int) -> Unit,
-    negativeAction: (DialogInterface, Int) -> Unit
+    positiveText: String? = null,
+    negativeText: String? = null,
+    positiveAction: ((DialogInterface, Int) -> Unit)? = null,
+    negativeAction: ((DialogInterface, Int) -> Unit)? = null
 ) {
     val alertDialogBuilder = AlertDialog.Builder(this)
     alertDialogBuilder.setMessage(message)
     alertDialogBuilder.setPositiveButton(positiveText, positiveAction)
-    alertDialogBuilder.setNegativeButton(negativeText, negativeAction)
+    positiveText?.let {
+        positiveAction?.let {
+            alertDialogBuilder.setPositiveButton(positiveText, positiveAction)
+        }
+    }
+    negativeText?.let {
+        negativeAction?.let {
+            alertDialogBuilder.setNegativeButton(negativeText, negativeAction)
+        }
+    }
     alertDialogBuilder.create().show()
 }
 
+/**
+ * defining color corresponding to [SingleVehicle] state
+ * */
 fun SingleVehicle.stateColor(): Int {
     return if (state == "ACTIVE") {
         Color.parseColor("#008577")
     } else Color.parseColor("#D81054")
+}
+
+/**
+ * add [VehicleMarker] in [GoogleMap]
+ * @param vehicleMarkers represents list of [VehicleMarker] obtained from vehicles table
+ * @param carIcon represents a marker icon
+ * */
+fun GoogleMap.addMarkers(
+    vehicleMarkers: List<VehicleMarker>,
+    carIcon: BitmapDescriptor
+) {
+    vehicleMarkers.forEach {
+        val marker = addMarker(it.getMarker(carIcon))
+        marker?.tag = it
+    }
+}
+
+/**
+ * create [MarkerOptions] from [VehicleMarker]
+ * @param carIcon represents a marker icon
+ * */
+fun VehicleMarker.getMarker(carIcon: BitmapDescriptor): MarkerOptions {
+    return MarkerOptions().title(type)
+        .position(latLng)
+        .icon(carIcon)
+        .rotation(heading.toFloat())
+}
+
+fun Context.checkNetworkConnection(): Boolean {
+    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+        val networkRequest = NetworkRequest.Builder()
+            .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+            .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
+            .addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR)
+            .build()
+        networkRequest.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+    } else {
+        val cm = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val nInfo = cm.activeNetworkInfo
+        return nInfo != null && nInfo.isAvailable && nInfo.isConnected
+    }
+
 }

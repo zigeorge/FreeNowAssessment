@@ -8,6 +8,7 @@
     <string name="cd_fab">Floating action button to change list or map view</string>
     <string name="failed_to_load">Failed to load data</string>
     <string name="failed_to_update">Failed to update data</string>
+    <string name="failed_to_connect">Please connect to network and retry</string>
     <string name="retry">Retry</string>
     <string name="exit">Exit</string>
 </resources>

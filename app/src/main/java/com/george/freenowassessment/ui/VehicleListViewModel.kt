@@ -8,10 +8,11 @@ import com.george.freenowassessment.other.Constants.MAX_SIZE
 import com.george.freenowassessment.other.Constants.PAGE_SIZE
 import com.george.freenowassessment.other.Constants.coordinate1
 import com.george.freenowassessment.other.Constants.coordinate2
+import com.george.freenowassessment.other.connectivity.ConnectivityObserver
 import com.george.freenowassessment.other.exceptions.UnableToUpdateException
 import com.george.freenowassessment.other.toVehicleMarker
 import com.george.freenowassessment.repositories.VehicleListRepository
-import com.george.freenowassessment.ui.vo.ErrorState
+import com.george.freenowassessment.other.exceptions.ErrorState
 import com.george.freenowassessment.ui.vo.SingleVehicle
 import com.george.freenowassessment.ui.vo.VehicleMarker
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -21,7 +22,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class VehicleListViewModel @Inject constructor(
-    private val repository: VehicleListRepository
+    private val repository: VehicleListRepository,
+    private val connectivityObserver: ConnectivityObserver
 ) : ViewModel() {
 
     init {
@@ -30,7 +32,7 @@ class VehicleListViewModel @Inject constructor(
     }
 
     //TODO: check for network connectivity
-    private val _allVehicles = MutableSharedFlow<List<VehicleMarker>>()
+    private val _allVehicles = MutableSharedFlow<List<VehicleMarker>>(replay = 5)
     val allVehicles = _allVehicles.asSharedFlow()
 
     private val _vehicleSelected = MutableStateFlow<VehicleMarker?>(null)
@@ -63,8 +65,8 @@ class VehicleListViewModel @Inject constructor(
             } catch (ex: Exception) {
                 when (ex) {
                     UnableToUpdateException::class.java ->
-                        _shouldShowError.emit(ErrorState.UNABLE_TO_UPDATE)
-                    else -> _shouldShowError.emit(ErrorState.UNABLE_TO_LOAD)
+                        _shouldShowError.emit(ErrorState.unableToUpdate)
+                    else -> _shouldShowError.emit(ErrorState.unableToLoad)
                 }
             }
         }

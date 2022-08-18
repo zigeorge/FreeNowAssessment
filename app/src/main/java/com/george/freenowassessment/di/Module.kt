@@ -8,6 +8,8 @@ import com.george.freenowassessment.data.local.VehicleDao
 import com.george.freenowassessment.data.remote.VehicleApi
 import com.george.freenowassessment.other.Constants.BASE_URL
 import com.george.freenowassessment.other.Constants.DB_NAME
+import com.george.freenowassessment.other.connectivity.ConnectivityObserver
+import com.george.freenowassessment.other.connectivity.NetworkConnectivityObserver
 import com.george.freenowassessment.repositories.VehicleListRepository
 import com.george.freenowassessment.repositories.VehicleListRepositoryImpl
 import com.george.freenowassessment.ui.adapters.VehicleRecyclerViewAdapter
@@ -60,5 +62,11 @@ object Module {
         api: VehicleApi,
         geocoder: Geocoder
     ) = VehicleListRepositoryImpl(api, dao, geocoder) as VehicleListRepository
+
+    @Singleton
+    @Provides
+    fun provideNetworkConnectivityObserver(
+        @ApplicationContext context: Context
+    ) = NetworkConnectivityObserver(context) as ConnectivityObserver
 
 }

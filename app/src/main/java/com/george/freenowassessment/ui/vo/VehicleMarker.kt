@@ -11,14 +11,4 @@ data class VehicleMarker(
     val address: String,
     val heading: Double,
     val state: String
-): ClusterItem {
-    override fun getPosition(): LatLng =
-        latLng
-
-    override fun getTitle(): String =
-        name
-
-    override fun getSnippet(): String =
-        address
-
-}
+)
