@@ -25,8 +25,8 @@ interface VehicleDao {
     @Query("DELETE FROM vehicles WHERE bound = :bound")
     suspend fun deleteAll(bound: String)
 
-    @Query("SELECT COUNT(id) FROM vehicles WHERE bound = :bound AND state = :state")
-    suspend fun countVehicles(bound: String, state: String): Int
+    @Query("SELECT COUNT(id) FROM vehicles WHERE bound = :bound")
+    suspend fun count(bound: String): Int
 
     @Update
     suspend fun updateVehicle(vehicle: Vehicle)
@@ -36,5 +36,8 @@ interface VehicleDao {
 
     @Query("UPDATE vehicles SET state = :state WHERE bound = :bound")
     suspend fun deactivateAll(state: String, bound: String)
+
+    @Query("DELETE FROM vehicles WHERE vehicleId NOT IN (:list)")
+    suspend fun deleteVehicles(list: Array<Long>)
 
 }

@@ -38,7 +38,6 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        startLoadingVehicles()
         viewModel = ViewModelProvider(this)[VehicleListViewModel::class.java]
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -112,7 +111,7 @@ class MainActivity : AppCompatActivity() {
                 positiveText = getString(R.string.retry),
                 negativeText = getString(R.string.exit),
                 positiveAction = { _, _ ->
-                    startLoadingVehicles()
+                    viewModel.loadVehicles()
                 },
                 negativeAction = { _, _ ->
                     finish()
@@ -122,7 +121,7 @@ class MainActivity : AppCompatActivity() {
                 getString(R.string.failed_to_connect),
                 positiveText = getString(R.string.retry),
                 positiveAction = { _, _ ->
-                    startLoadingVehicles()
+                    viewModel.loadVehicles()
                 }
             )
         }

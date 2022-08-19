@@ -24,9 +24,8 @@ class VehicleListRepositoryImpl @Inject constructor(
             vehicleDataSource
                 .storeData(coordinate1, coordinate2)
         } catch (ex: Exception) {
-            val count = dao.countVehicles(
-                coordinate1.toString() + coordinate2.toString(),
-                ACTIVE
+            val count = dao.count(
+                coordinate1.toString() + coordinate2.toString()
             )
             if (count > 0) {
                 throw UnableToUpdateException("Unable to update new data")

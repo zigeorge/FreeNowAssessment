@@ -27,7 +27,7 @@ class VehicleListViewModel @Inject constructor(
 ) : ViewModel() {
 
     init {
-//        loadVehicles()
+        loadVehicles()
         getAllVehiclesToShowMarkerInMap()
     }
 

@@ -2,6 +2,7 @@ package com.george.freenowassessment.ui.fragments
 
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -21,6 +22,7 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.BitmapDescriptor
 import com.google.android.gms.maps.model.LatLngBounds
+import com.google.android.gms.maps.model.Marker
 import com.google.maps.android.ktx.awaitMap
 import com.google.maps.android.ktx.awaitMapLoad
 import kotlinx.coroutines.flow.collectLatest
@@ -34,6 +36,8 @@ class MapsFragment : Fragment() {
     private var googleMap: GoogleMap? = null
 
     private var bounds = LatLngBounds.Builder()
+
+    private var selectedVehicle: VehicleMarker? = null
 
     /**
      * The icon to use for each cluster item
@@ -68,8 +72,14 @@ class MapsFragment : Fragment() {
 
     private suspend fun setAllVehiclesInMap() {
         viewModel.allVehicles.collectLatest { vehicleMarkers ->
-            googleMap?.addMarkers(vehicleMarkers, carIcon)
-            setLatLngInBound(vehicleMarkers)
+            Log.e("VEHICLE-MARKERS", vehicleMarkers.size.toString())
+            if(vehicleMarkers.isEmpty()) {
+                googleMap?.clear()
+                bounds = LatLngBounds.builder()
+            } else {
+                googleMap?.addMarkers(vehicleMarkers, carIcon)
+                setLatLngInBound(vehicleMarkers)
+            }
         }
     }
 
@@ -87,20 +97,26 @@ class MapsFragment : Fragment() {
         vehicleMarkers.forEach {
             bounds.include(it.latLng)
         }
+        updateCamera()
     }
 
     private suspend fun setMapToShowSelectedVehicle() {
         viewModel.vehicleSelected.collect {
+            selectedVehicle = it
             it?.let {
                 // zooming the camera to selected vehicle
                 googleMap?.animateCamera(CameraUpdateFactory.newLatLngZoom(it.latLng, 20f))
-            } ?: run {
-                googleMap?.animateCamera(
-                    CameraUpdateFactory.newLatLngBounds(
-                        bounds.build(), 0
-                    )
-                )
             }
+        }
+    }
+
+    private fun updateCamera() {
+        if(selectedVehicle == null) {
+            googleMap?.animateCamera(
+                CameraUpdateFactory.newLatLngBounds(
+                    bounds.build(), 0
+                )
+            )
         }
     }
 
