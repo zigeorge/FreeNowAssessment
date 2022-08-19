@@ -1,12 +1,7 @@
 package com.george.freenowassessment.repositories
 
 import android.location.Geocoder
-import android.util.Log
-import com.george.freenowassessment.data.local.Vehicle
-import com.george.freenowassessment.data.local.Vehicle.Companion.ACTIVE
-import com.george.freenowassessment.data.local.Vehicle.Companion.INACTIVE
 import com.george.freenowassessment.data.local.VehicleDao
-import com.george.freenowassessment.data.local.VehicleList
 import com.george.freenowassessment.data.remote.VehicleApi
 import com.george.freenowassessment.data.remote.responses.Coordinate
 import com.george.freenowassessment.data.remote.responses.VehicleData
@@ -22,46 +17,52 @@ class VehicleDataSource @Inject constructor(
 
     /**
      * this function update all local data from db with [VehicleData] from API
+     * it also simultaneously request API to update the local db
      * */
-    suspend fun storeData(
+    fun storeData(
         coordinate1: Coordinate,
         coordinate2: Coordinate
     ) {
-        try {
+        /**
+         * [CoroutineExceptionHandler] used to ignore any exception that may occurs
+         * during this process
+        * */
+        val handler = CoroutineExceptionHandler { _, ex ->
+            print(ex.message)
+        }
+        CoroutineScope(Dispatchers.IO+handler).launch {
             // store and update db with list from api
-            CoroutineScope(Dispatchers.IO).launch {
-                while(true) {
-                    val bound = coordinate1.toString() + coordinate2.toString()
-                    // get vehicle list from API
-                    val list = api.getVehicleList(
-                        coordinate1.latitude,
-                        coordinate1.longitude,
-                        coordinate2.latitude,
-                        coordinate2.longitude
-                    ).body()?.poiList ?: ArrayList()
-                    val ids = ArrayList<Long>()
-                    list.forEach {
-                        ids.add(it.id)
-                    }
-                    Log.e("COUNT-API", list.size.toString())
-                    dao.deleteVehicles(ids.toTypedArray())
-                    val count = dao.count(bound)
-                    list.forEach { data ->
-                        if (count == 0) {
-                            dao.insert(data.getVehicle(geocoder, bound))
-                        } else {
-                            updateVehicles(data, bound)
-                        }
-                    }
-                    Log.e("COUNT-DB", dao.count(bound).toString())
-                    delay(5000)
+            while (true) {
+                val bound = coordinate1.toString() + coordinate2.toString()
+                // get vehicle list from API
+                val list = api.getVehicleList(
+                    coordinate1.latitude,
+                    coordinate1.longitude,
+                    coordinate2.latitude,
+                    coordinate2.longitude
+                ).body()?.poiList ?: ArrayList()
+                val ids = ArrayList<Long>()
+                list.forEach {
+                    ids.add(it.id)
                 }
+                dao.deleteVehicles(ids.toTypedArray())
+                val count = dao.count(bound)
+                list.forEach { data ->
+                    if (count == 0) {
+                        dao.insert(data.getVehicle(geocoder, bound))
+                    } else {
+                        updateVehicles(data, bound)
+                    }
+                }
+                delay(5000)
             }
-        } catch (ex: Exception) {
-            throw ex
         }
     }
 
+    /**
+     * update if found in DB
+     * insert [VehicleData] otherwise
+     * */
     private suspend fun updateVehicles(data: VehicleData, bound: String) {
         val aVehicle = dao.getVehicle(data.id)
         aVehicle?.let {

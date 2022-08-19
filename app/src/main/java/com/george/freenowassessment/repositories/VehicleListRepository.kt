@@ -12,7 +12,7 @@ interface VehicleListRepository {
      *  @param coordinate1 in the bounds of Hamburg
      * @param coordinate2 in the bounds of Hamburg
      * */
-    suspend fun loadVehicleList(
+    fun loadVehicleList(
         coordinate1: Coordinate,
         coordinate2: Coordinate
     )

@@ -8,9 +8,15 @@ import com.george.freenowassessment.ui.vo.VehicleMarker
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.model.Marker
 
+
+
+/**
+ * this adapter helps googleMap markers to show contents from [VehicleMarker]
+ * */
 class MarkerInfoWindowAdapter(
     private val context: Context
 ) : GoogleMap.InfoWindowAdapter {
+
     override fun getInfoContents(marker: Marker): View? {
         val vehicleMarker = marker.tag as? VehicleMarker ?: return null
 

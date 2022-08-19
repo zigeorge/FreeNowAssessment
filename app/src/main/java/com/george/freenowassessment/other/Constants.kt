@@ -15,6 +15,6 @@ object Constants {
     val coordinate1 = Coordinate(53.694865,9.757589)
     val coordinate2 = Coordinate(53.394655,10.099891)
 
-    val BOUND = coordinate1.toString() + coordinate2.toString()
+    const val ACTIVE = "ACTIVE"
 
 }

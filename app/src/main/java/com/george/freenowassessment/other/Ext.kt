@@ -1,14 +1,7 @@
 package com.george.freenowassessment.other
 
-import android.content.Context
-import android.content.DialogInterface
 import android.graphics.Color
 import android.location.Geocoder
-import android.net.ConnectivityManager
-import android.net.NetworkCapabilities
-import android.net.NetworkRequest
-import android.os.Build
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -22,7 +15,6 @@ import com.george.freenowassessment.ui.vo.VehicleMarker
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.model.BitmapDescriptor
 import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.gson.Gson
 import kotlinx.coroutines.flow.Flow
@@ -80,32 +72,6 @@ fun Vehicle.toVehicleMarker(): VehicleMarker {
         heading,
         state
     )
-}
-
-/**
- * Create and show [AlertDialog] in [AppCompatActivity]
- * */
-fun AppCompatActivity.showDialog(
-    message: String,
-    positiveText: String? = null,
-    negativeText: String? = null,
-    positiveAction: ((DialogInterface, Int) -> Unit)? = null,
-    negativeAction: ((DialogInterface, Int) -> Unit)? = null
-) {
-    val alertDialogBuilder = AlertDialog.Builder(this)
-    alertDialogBuilder.setMessage(message)
-    alertDialogBuilder.setPositiveButton(positiveText, positiveAction)
-    positiveText?.let {
-        positiveAction?.let {
-            alertDialogBuilder.setPositiveButton(positiveText, positiveAction)
-        }
-    }
-    negativeText?.let {
-        negativeAction?.let {
-            alertDialogBuilder.setNegativeButton(negativeText, negativeAction)
-        }
-    }
-    alertDialogBuilder.create().show()
 }
 
 /**

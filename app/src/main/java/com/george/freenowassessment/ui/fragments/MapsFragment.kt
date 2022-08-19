@@ -26,6 +26,7 @@ import com.google.android.gms.maps.model.Marker
 import com.google.maps.android.ktx.awaitMap
 import com.google.maps.android.ktx.awaitMapLoad
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
 class MapsFragment : Fragment() {
 
@@ -63,16 +64,20 @@ class MapsFragment : Fragment() {
         }
 
         lifecycleScope.launchWhenResumed {
-            setAllVehiclesInMap()
-        }
-        lifecycleScope.launchWhenResumed {
-            setMapToShowSelectedVehicle()
+            launch {
+                setAllVehiclesInMap()
+            }
+            launch {
+                setMapToShowSelectedVehicle()
+            }
         }
     }
 
+    /**
+     * collect allVehicles from [VehicleListViewModel]
+     * */
     private suspend fun setAllVehiclesInMap() {
         viewModel.allVehicles.collectLatest { vehicleMarkers ->
-            Log.e("VEHICLE-MARKERS", vehicleMarkers.size.toString())
             if(vehicleMarkers.isEmpty()) {
                 googleMap?.clear()
                 bounds = LatLngBounds.builder()
@@ -83,6 +88,9 @@ class MapsFragment : Fragment() {
         }
     }
 
+    /**
+    * initialize [GoogleMap] from [SupportMapFragment] & configure with [MarkerInfoWindowAdapter]
+    * */
     @SuppressLint("PotentialBehaviorOverride")
     private suspend fun configureGoogleMap(): GoogleMap? {
         val mapFragment: SupportMapFragment? =
@@ -93,6 +101,9 @@ class MapsFragment : Fragment() {
         return googleMap
     }
 
+    /**
+     * bound the map within available vehicleMarkers
+     * */
     private fun setLatLngInBound(vehicleMarkers: List<VehicleMarker>) {
         vehicleMarkers.forEach {
             bounds.include(it.latLng)
@@ -100,6 +111,10 @@ class MapsFragment : Fragment() {
         updateCamera()
     }
 
+    /**
+     * try to collect selectedVehicle from [VehicleListViewModel] if a specific
+     * vehicle is selected from [VehicleFragment]
+     * */
     private suspend fun setMapToShowSelectedVehicle() {
         viewModel.vehicleSelected.collect {
             selectedVehicle = it
@@ -110,6 +125,9 @@ class MapsFragment : Fragment() {
         }
     }
 
+    /**
+     * update the camera when no vehicle is selected from [VehicleFragment]
+     * */
     private fun updateCamera() {
         if(selectedVehicle == null) {
             googleMap?.animateCamera(

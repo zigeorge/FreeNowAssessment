@@ -19,6 +19,11 @@ class NetworkConnectivityObserver(
     private val connectivityManager =
         context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 
+    /**
+     * this function observe for connectivity changes and notify using a callback flow
+     * only two status is maintained here (Available, Unavailable)
+     * support added for minimum API Level 21
+     * */
     override fun observe(): Flow<ConnectivityObserver.Status> {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             callbackFlow {

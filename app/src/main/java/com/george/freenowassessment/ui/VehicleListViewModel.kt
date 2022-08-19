@@ -9,10 +9,8 @@ import com.george.freenowassessment.other.Constants.PAGE_SIZE
 import com.george.freenowassessment.other.Constants.coordinate1
 import com.george.freenowassessment.other.Constants.coordinate2
 import com.george.freenowassessment.other.connectivity.ConnectivityObserver
-import com.george.freenowassessment.other.exceptions.UnableToUpdateException
 import com.george.freenowassessment.other.toVehicleMarker
 import com.george.freenowassessment.repositories.VehicleListRepository
-import com.george.freenowassessment.other.exceptions.ErrorState
 import com.george.freenowassessment.ui.vo.SingleVehicle
 import com.george.freenowassessment.ui.vo.VehicleMarker
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -27,7 +25,13 @@ class VehicleListViewModel @Inject constructor(
 ) : ViewModel() {
 
     init {
-        loadVehicles()
+        viewModelScope.launch {
+            connectivityObserver.observe().collectLatest {
+                if(it == ConnectivityObserver.Status.Available) {
+                    loadVehicles()
+                }
+            }
+        }
         getAllVehiclesToShowMarkerInMap()
     }
 
@@ -36,9 +40,6 @@ class VehicleListViewModel @Inject constructor(
 
     private val _vehicleSelected = MutableStateFlow<VehicleMarker?>(null)
     val vehicleSelected = _vehicleSelected.asStateFlow()
-
-    private val _shouldShowError = MutableSharedFlow<ErrorState>()
-    val shouldShowError = _shouldShowError.asSharedFlow()
 
     val vehicleList: SharedFlow<PagingData<SingleVehicle>> = Pager(
         config = PagingConfig(
@@ -57,18 +58,8 @@ class VehicleListViewModel @Inject constructor(
     }
         .cachedIn(viewModelScope) as SharedFlow<PagingData<SingleVehicle>>
 
-    fun loadVehicles() {
-        viewModelScope.launch {
-            try {
-                repository.loadVehicleList(coordinate1, coordinate2)
-            } catch (ex: Exception) {
-                when (ex) {
-                    UnableToUpdateException::class.java ->
-                        _shouldShowError.emit(ErrorState.unableToUpdate)
-                    else -> _shouldShowError.emit(ErrorState.unableToLoad)
-                }
-            }
-        }
+    private fun loadVehicles() {
+        repository.loadVehicleList(coordinate1, coordinate2)
     }
 
     private fun getAllVehiclesToShowMarkerInMap() {

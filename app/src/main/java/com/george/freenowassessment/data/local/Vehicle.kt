@@ -1,19 +1,9 @@
 package com.george.freenowassessment.data.local
 
-import android.location.Geocoder
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.george.freenowassessment.data.local.Vehicle.Companion.ACTIVE
-import com.george.freenowassessment.data.local.Vehicle.Companion.INACTIVE
 import com.george.freenowassessment.data.remote.responses.VehicleData
 import com.george.freenowassessment.other.Constants.VEHICLE_TABLE
-import com.george.freenowassessment.other.address
-import com.george.freenowassessment.other.toJson
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import okhttp3.internal.toImmutableList
 
 /** [Vehicle] entity for Room DB */
 @Entity(tableName = VEHICLE_TABLE)
@@ -55,80 +45,5 @@ class Vehicle(
         result = 31 * result + heading.hashCode()
         result = 31 * result + (id ?: 0)
         return result
-    }
-
-    companion object {
-        // these constants represents vehicles state
-        const val ACTIVE = "ACTIVE"
-        const val INACTIVE = "INACTIVE"
-    }
-}
-
-@OptIn(DelicateCoroutinesApi::class)
-class VehicleList {
-    var vehicles = ArrayList<Vehicle>()
-
-    fun hasVehicle(id: Long): Boolean {
-        vehicles.forEach {
-            if (it.vehicleId == id)
-                return true
-        }
-        return false
-    }
-
-    fun getVehicle(id: Long): Vehicle? {
-        vehicles.forEach {
-            if (it.vehicleId == id)
-                return it
-        }
-        return null
-    }
-
-    fun update(data: VehicleData, geocoder: Geocoder) {
-        // GlobalScope is used to run the insert operation in IO dispatcher as
-        // getting address from geocoder blocks the main thread otherwise
-//        GlobalScope.launch(Dispatchers.IO) {
-            val vehicle = getVehicle(data.id)
-            vehicle?.let {
-                it.latitude = data.coordinate.latitude
-                it.longitude = data.coordinate.longitude
-                it.address = data.coordinate.address(geocoder).toJson()
-                it.state = data.state
-                it.heading = data.heading
-            }
-//        }
-    }
-
-    fun deactivateAll() {
-        vehicles.forEach {
-            it.state = INACTIVE
-        }
-    }
-
-    fun add(list: List<VehicleData>, geocoder: Geocoder, bound: String) {
-        list.forEach {
-            add(it, geocoder, bound)
-        }
-    }
-
-    fun add(list: List<Vehicle>) {
-        vehicles.addAll(list.toTypedArray())
-    }
-
-    fun add(data: VehicleData, geocoder: Geocoder, bound: String) {
-
-            vehicles.add(
-                Vehicle(
-                    data.id,
-                    data.coordinate.latitude,
-                    data.coordinate.longitude,
-                    data.coordinate.address(geocoder).toJson(),
-                    data.fleetType,
-                    data.state,
-                    bound,
-                    data.heading
-                )
-            )
-
     }
 }

@@ -13,7 +13,7 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory
 
 object BitmapHelper {
     /**
-     * Demonstrates converting a [Drawable] to a [BitmapDescriptor],
+     * Demonstrates converting a [DrawableRes] to a [BitmapDescriptor],
      * for use as a marker icon. Taken from ApiDemos on GitHub:
      * https://github.com/googlemaps/android-samples/blob/main/ApiDemos/kotlin/app/src/main/java/com/example/kotlindemos/MarkerDemoActivity.kt
      */
