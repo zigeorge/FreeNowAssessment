@@ -78,4 +78,15 @@ class VehicleListViewModel @Inject constructor(
     fun removeVehicleSelection() {
         _vehicleSelected.value = null
     }
+
+    fun getRemovableMarkers(ids: Set<Long>): List<Long> {
+        val availableIds = repository.getAllIds(coordinate1, coordinate2)
+        val removables = ArrayList<Long>()
+        ids.forEach {
+            if(!availableIds.contains(it)) {
+                removables.add(it)
+            }
+        }
+        return removables
+    }
 }

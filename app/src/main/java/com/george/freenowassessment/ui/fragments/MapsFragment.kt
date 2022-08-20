@@ -2,6 +2,7 @@ package com.george.freenowassessment.ui.fragments
 
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -18,14 +19,16 @@ import com.george.freenowassessment.other.addMarkers
 import com.george.freenowassessment.other.latLng
 import com.george.freenowassessment.ui.VehicleListViewModel
 import com.george.freenowassessment.ui.adapters.MarkerInfoWindowAdapter
-import com.george.freenowassessment.ui.vo.VehicleMarker
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.BitmapDescriptor
 import com.google.android.gms.maps.model.LatLngBounds
+import com.google.android.gms.maps.model.Marker
 import com.google.maps.android.ktx.awaitMap
 import com.google.maps.android.ktx.awaitMapLoad
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
@@ -36,6 +39,8 @@ class MapsFragment : Fragment() {
     private var _binding: FragmentMapsBinding? = null
 
     private var googleMap: GoogleMap? = null
+
+    private val markersMap = HashMap<Long, Marker?>()
 
     /**
      * The icon to use for each cluster item
@@ -67,18 +72,24 @@ class MapsFragment : Fragment() {
             launch {
                 setMapToShowSelectedVehicles()
             }
+            launch(Dispatchers.IO) {
+                checkMarkersIfExists()
+            }
         }
     }
 
     /**
-     * collect allVehicles from [VehicleListViewModel]
+     * collect allVehicles from [VehicleListViewModel] and show them in [GoogleMap]
      * */
     private suspend fun setAllVehiclesInMap() {
         viewModel.allVehicles.collectLatest { vehicleMarkers ->
             if(vehicleMarkers.isEmpty()) {
                 googleMap?.clear()
+                markersMap.clear()
             } else {
-                googleMap?.addMarkers(vehicleMarkers, carIcon)
+                Log.e("SIZE-MARKERS", markersMap.size.toString())
+                googleMap?.addMarkers(vehicleMarkers, markersMap, carIcon)
+                    ?.let { markersMap.putAll(it) }
             }
         }
     }
@@ -121,6 +132,22 @@ class MapsFragment : Fragment() {
                 googleMap?.animateCamera(CameraUpdateFactory.newLatLngZoom(it.latLng, 20f))
             } ?: run {
                 setLatLngInBound()
+            }
+        }
+    }
+
+    /**
+     * a function to check if @property markersMap contains valid markers
+    * */
+    private suspend fun checkMarkersIfExists() {
+        while (true) {
+            delay(2000)
+            val removables = viewModel.getRemovableMarkers(markersMap.keys)
+            lifecycleScope.launch(Dispatchers.Main) {
+                removables.forEach {
+                    markersMap[it]?.remove()
+                    markersMap.remove(it)
+                }
             }
         }
     }

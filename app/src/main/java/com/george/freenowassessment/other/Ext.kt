@@ -15,6 +15,7 @@ import com.george.freenowassessment.ui.vo.VehicleMarker
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.model.BitmapDescriptor
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.gson.Gson
 import kotlinx.coroutines.flow.Flow
@@ -93,16 +94,27 @@ fun SingleVehicle.stateColor(): Int {
 /**
  * add [VehicleMarker] in [GoogleMap]
  * @param vehicleMarkers represents list of [VehicleMarker] obtained from vehicles table
+ * @param markersMap contains all markers added
  * @param carIcon represents a marker icon
+ * this function also check if marker already exists and remove and add the marker again to
+ * show update in map
  * */
 fun GoogleMap.addMarkers(
     vehicleMarkers: List<VehicleMarker>,
+    markersMap: HashMap<Long, Marker?>,
     carIcon: BitmapDescriptor
-) {
+): HashMap<Long, Marker?> {
+    val map = HashMap<Long, Marker?>()
     vehicleMarkers.forEach {
+        if(markersMap.containsKey(it.id)) {
+            val aMarker = markersMap[it.id]
+            aMarker?.remove()
+        }
         val marker = addMarker(it.getMarker(carIcon))
         marker?.tag = it
+        map[it.id] = marker
     }
+    return map
 }
 
 /**

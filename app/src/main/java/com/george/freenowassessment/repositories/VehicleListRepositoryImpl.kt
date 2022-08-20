@@ -41,4 +41,8 @@ class VehicleListRepositoryImpl @Inject constructor(
             ACTIVE
         )
     }
+
+    override fun getAllIds(coordinate1: Coordinate, coordinate2: Coordinate): List<Long> {
+        return dao.getAllIds(coordinate1.toString()+coordinate2.toString())
+    }
 }

@@ -34,4 +34,15 @@ class VehicleListRepositoryTest: VehicleListRepository {
     ): Flow<List<Vehicle>> {
         return vehiclesFlow
     }
+
+    override fun getAllIds(
+        coordinate1: Coordinate,
+        coordinate2: Coordinate
+    ): List<Long> {
+        val list = ArrayList<Long>()
+        vehicles.forEach {
+            list.add(it.vehicleId)
+        }
+        return list
+    }
 }

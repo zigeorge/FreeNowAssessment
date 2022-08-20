@@ -34,4 +34,9 @@ interface VehicleListRepository {
         coordinate1: Coordinate,
         coordinate2: Coordinate
     ): Flow<List<Vehicle>>
+
+    fun getAllIds(
+        coordinate1: Coordinate,
+        coordinate2: Coordinate
+    ): List<Long>
 }

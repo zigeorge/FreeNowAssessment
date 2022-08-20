@@ -31,4 +31,7 @@ interface VehicleDao {
     @Query("DELETE FROM vehicles WHERE vehicleId NOT IN (:list)")
     suspend fun deleteVehicles(list: Array<Long>)
 
+    @Query("SELECT vehicleId FROM vehicles WHERE bound = :bound")
+    fun getAllIds(bound: String): List<Long>
+
 }
