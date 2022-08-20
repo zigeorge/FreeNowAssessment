@@ -8,7 +8,7 @@ import com.george.freenowassessment.other.Constants.MAX_SIZE
 import com.george.freenowassessment.other.Constants.PAGE_SIZE
 import com.george.freenowassessment.other.Constants.coordinate1
 import com.george.freenowassessment.other.Constants.coordinate2
-import com.george.freenowassessment.other.connectivity.ConnectivityObserver
+import com.george.freenowassessment.other.DispatcherProvider
 import com.george.freenowassessment.other.toVehicleMarker
 import com.george.freenowassessment.repositories.VehicleListRepository
 import com.george.freenowassessment.ui.vo.SingleVehicle
@@ -20,18 +20,10 @@ import javax.inject.Inject
 
 @HiltViewModel
 class VehicleListViewModel @Inject constructor(
-    private val repository: VehicleListRepository,
-    private val connectivityObserver: ConnectivityObserver
+    private val repository: VehicleListRepository
 ) : ViewModel() {
 
     init {
-        viewModelScope.launch {
-            connectivityObserver.observe().collectLatest {
-                if(it == ConnectivityObserver.Status.Available) {
-                    loadVehicles()
-                }
-            }
-        }
         getAllVehiclesToShowMarkerInMap()
     }
 
@@ -58,7 +50,8 @@ class VehicleListViewModel @Inject constructor(
     }
         .cachedIn(viewModelScope) as SharedFlow<PagingData<SingleVehicle>>
 
-    private fun loadVehicles() {
+
+    fun loadVehicles() {
         repository.loadVehicleList(coordinate1, coordinate2)
     }
 

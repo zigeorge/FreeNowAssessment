@@ -78,6 +78,8 @@ dependencies {
     implementation "androidx.room:room-runtime:$rootProject.room_version"
     implementation "androidx.room:room-ktx:$rootProject.room_version"
     implementation "androidx.room:room-paging:$rootProject.room_version"
+    testImplementation 'junit:junit:4.12'
+    testImplementation 'junit:junit:4.12'
     kapt "androidx.room:room-compiler:$rootProject.room_version"
 
     // Dagger-hilt components
@@ -98,6 +100,7 @@ dependencies {
     testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.1"
     testImplementation "com.google.truth:truth:1.1.3"
     testImplementation "org.mockito:mockito-core:4.6.1"
+    testImplementation 'app.cash.turbine:turbine:0.9.0'
     kaptTest "com.google.dagger:hilt-compiler:$rootProject.hilt_version"
     //For Integration tests
     androidTestImplementation  "com.google.dagger:hilt-android-testing:$rootProject.hilt_version"

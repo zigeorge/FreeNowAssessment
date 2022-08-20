@@ -8,6 +8,8 @@ import com.george.freenowassessment.data.local.VehicleDao
 import com.george.freenowassessment.data.remote.VehicleApi
 import com.george.freenowassessment.other.Constants.BASE_URL
 import com.george.freenowassessment.other.Constants.DB_NAME
+import com.george.freenowassessment.other.DefaultDispatchers
+import com.george.freenowassessment.other.DispatcherProvider
 import com.george.freenowassessment.other.connectivity.ConnectivityObserver
 import com.george.freenowassessment.other.connectivity.NetworkConnectivityObserver
 import com.george.freenowassessment.repositories.VehicleDataSource
@@ -84,5 +86,9 @@ object Module {
     fun provideNetworkConnectivityObserver(
         @ApplicationContext context: Context
     ) = NetworkConnectivityObserver(context) as ConnectivityObserver
+
+    @Singleton
+    @Provides
+    fun provideDispatcherProvider() = DefaultDispatchers() as DispatcherProvider
 
 }

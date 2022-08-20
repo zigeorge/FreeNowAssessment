@@ -12,8 +12,10 @@ import androidx.navigation.ui.setupWithNavController
 import com.george.freenowassessment.R
 import com.george.freenowassessment.databinding.ActivityMainBinding
 import com.george.freenowassessment.other.collectLifeCycleFlow
+import com.george.freenowassessment.other.connectivity.ConnectivityObserver
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
@@ -23,6 +25,8 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var navController: NavController
     private lateinit var appBarConfiguration: AppBarConfiguration
+
+    @Inject lateinit var connectivityObserver: ConnectivityObserver
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -49,6 +53,13 @@ class MainActivity : AppCompatActivity() {
         collectLifeCycleFlow(viewModel.vehicleSelected) { vehicleMarker ->
             vehicleMarker?.let {
                 binding.bottomNav.selectedItemId = R.id.mapsFragment
+            }
+        }
+
+        /** check for network */
+        collectLifeCycleFlow(connectivityObserver.observe()) {
+            if(it == ConnectivityObserver.Status.Available) {
+                viewModel.loadVehicles()
             }
         }
     }
