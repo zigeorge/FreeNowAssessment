@@ -60,6 +60,13 @@ fun Coordinate.address(geocoder: Geocoder): Address {
 }
 
 /**
+ * function to get [LatLng] from [Coordinate]
+ * */
+fun Coordinate.latLng(): LatLng {
+    return LatLng(latitude, longitude)
+}
+
+/**
  * create [VehicleMarker] from db entity [Vehicle]
  * */
 fun Vehicle.toVehicleMarker(): VehicleMarker {

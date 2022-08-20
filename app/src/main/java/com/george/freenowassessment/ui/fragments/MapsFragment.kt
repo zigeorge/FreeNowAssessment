@@ -2,7 +2,6 @@ package com.george.freenowassessment.ui.fragments
 
 import android.annotation.SuppressLint
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -13,7 +12,10 @@ import androidx.lifecycle.lifecycleScope
 import com.george.freenowassessment.R
 import com.george.freenowassessment.databinding.FragmentMapsBinding
 import com.george.freenowassessment.other.BitmapHelper
+import com.george.freenowassessment.other.Constants.coordinate1
+import com.george.freenowassessment.other.Constants.coordinate2
 import com.george.freenowassessment.other.addMarkers
+import com.george.freenowassessment.other.latLng
 import com.george.freenowassessment.ui.VehicleListViewModel
 import com.george.freenowassessment.ui.adapters.MarkerInfoWindowAdapter
 import com.george.freenowassessment.ui.vo.VehicleMarker
@@ -22,7 +24,6 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.BitmapDescriptor
 import com.google.android.gms.maps.model.LatLngBounds
-import com.google.android.gms.maps.model.Marker
 import com.google.maps.android.ktx.awaitMap
 import com.google.maps.android.ktx.awaitMapLoad
 import kotlinx.coroutines.flow.collectLatest
@@ -35,10 +36,6 @@ class MapsFragment : Fragment() {
     private var _binding: FragmentMapsBinding? = null
 
     private var googleMap: GoogleMap? = null
-
-    private var bounds = LatLngBounds.Builder()
-
-    private var selectedVehicle: VehicleMarker? = null
 
     /**
      * The icon to use for each cluster item
@@ -68,7 +65,7 @@ class MapsFragment : Fragment() {
                 setAllVehiclesInMap()
             }
             launch {
-                setMapToShowSelectedVehicle()
+                setMapToShowSelectedVehicles()
             }
         }
     }
@@ -80,10 +77,8 @@ class MapsFragment : Fragment() {
         viewModel.allVehicles.collectLatest { vehicleMarkers ->
             if(vehicleMarkers.isEmpty()) {
                 googleMap?.clear()
-                bounds = LatLngBounds.builder()
             } else {
                 googleMap?.addMarkers(vehicleMarkers, carIcon)
-                setLatLngInBound(vehicleMarkers)
             }
         }
     }
@@ -104,37 +99,29 @@ class MapsFragment : Fragment() {
     /**
      * bound the map within available vehicleMarkers
      * */
-    private fun setLatLngInBound(vehicleMarkers: List<VehicleMarker>) {
-        vehicleMarkers.forEach {
-            bounds.include(it.latLng)
-        }
-        updateCamera()
+    private fun setLatLngInBound() {
+        val bounds = LatLngBounds.builder()
+        bounds.include(coordinate1.latLng())
+        bounds.include(coordinate2.latLng())
+        googleMap?.animateCamera(
+            CameraUpdateFactory.newLatLngZoom(
+                bounds.build().center, 11.5f
+            )
+        )
     }
 
     /**
      * try to collect selectedVehicle from [VehicleListViewModel] if a specific
      * vehicle is selected from [VehicleFragment]
      * */
-    private suspend fun setMapToShowSelectedVehicle() {
+    private suspend fun setMapToShowSelectedVehicles() {
         viewModel.vehicleSelected.collect {
-            selectedVehicle = it
             it?.let {
                 // zooming the camera to selected vehicle
                 googleMap?.animateCamera(CameraUpdateFactory.newLatLngZoom(it.latLng, 20f))
+            } ?: run {
+                setLatLngInBound()
             }
-        }
-    }
-
-    /**
-     * update the camera when no vehicle is selected from [VehicleFragment]
-     * */
-    private fun updateCamera() {
-        if(selectedVehicle == null) {
-            googleMap?.animateCamera(
-                CameraUpdateFactory.newLatLngBounds(
-                    bounds.build(), 0
-                )
-            )
         }
     }
 
