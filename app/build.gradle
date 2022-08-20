@@ -78,9 +78,6 @@ dependencies {
     implementation "androidx.room:room-runtime:$rootProject.room_version"
     implementation "androidx.room:room-ktx:$rootProject.room_version"
     implementation "androidx.room:room-paging:$rootProject.room_version"
-    testImplementation 'junit:junit:4.12'
-    testImplementation 'junit:junit:4.12'
-    testImplementation 'junit:junit:4.12'
     kapt "androidx.room:room-compiler:$rootProject.room_version"
 
     // Dagger-hilt components
@@ -104,6 +101,7 @@ dependencies {
     testImplementation 'app.cash.turbine:turbine:0.9.0'
     kaptTest "com.google.dagger:hilt-compiler:$rootProject.hilt_version"
     //For Integration tests
+    androidTestImplementation "junit:junit:$rootProject.junit_version"
     androidTestImplementation  "com.google.dagger:hilt-android-testing:$rootProject.hilt_version"
     androidTestImplementation "androidx.room:room-testing:$rootProject.room_version"
     androidTestImplementation "androidx.arch.core:core-testing:$rootProject.core_testing_version"

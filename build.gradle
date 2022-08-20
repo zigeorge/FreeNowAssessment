@@ -9,7 +9,7 @@ buildscript {
         nav_version = '2.5.1'
         room_version = '2.4.3'
         paging_version = '3.1.1'
-        junit_version = '4.13.2'
+        junit_version = '4.12'
         hilt_version = '2.42'
         core_testing_version = '2.1.0'
         espresso_version = '3.4.0'

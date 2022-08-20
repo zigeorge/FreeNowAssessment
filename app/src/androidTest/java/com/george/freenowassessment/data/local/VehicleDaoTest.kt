@@ -112,19 +112,38 @@ class VehicleDaoTest {
     }
 
     @Test
-    fun checkDeleteVehiclesDeleteVehiclesNotListedInGivenIds() = runTest {
+    fun deleteVehiclesDeletesAllVehicleNotListedInGivenIds() = runTest {
         val vehicles = vehicleFactory.fakeVehicles()
         val ids = ArrayList<Long>()
+        var index = 0
         vehicles.forEach {
             dao.insert(it)
-            ids.add(it.vehicleId)
+            if(index < 50) {
+                ids.add(it.vehicleId)
+                index++
+            }
+
         }
         dao.deleteVehicles(ids.toTypedArray())
 
         val count = dao.count(BOUND)
 
-        assertThat(count).isEqualTo(0)
+        assertThat(count).isEqualTo(50)
 
+    }
+
+    @Test
+    fun getAllIdsReturnsAllIds() = runTest {
+        val vehicles = vehicleFactory.fakeVehicles()
+        vehicles.forEach {
+            dao.insert(it)
+        }
+
+        val result = dao.getAllIds(BOUND)
+
+        val count = dao.count(BOUND)
+
+        assertThat(result.size).isEqualTo(count)
     }
 
 }
