@@ -17,7 +17,7 @@ android {
         versionCode 1
         versionName "1.0"
 
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner "com.george.freenowassessment.HiltTestRunner"
 
         Properties properties = new Properties()
         properties.load(project.rootProject.file('local.properties').newDataInputStream())
@@ -80,6 +80,7 @@ dependencies {
     implementation "androidx.room:room-paging:$rootProject.room_version"
     testImplementation 'junit:junit:4.12'
     testImplementation 'junit:junit:4.12'
+    testImplementation 'junit:junit:4.12'
     kapt "androidx.room:room-compiler:$rootProject.room_version"
 
     // Dagger-hilt components
@@ -113,6 +114,7 @@ dependencies {
     androidTestImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.1"
     androidTestImplementation "com.google.truth:truth:1.1.3"
     androidTestImplementation "org.mockito:mockito-core:4.6.1"
+    androidTestImplementation 'app.cash.turbine:turbine:0.9.0'
     kaptAndroidTest "com.google.dagger:hilt-compiler:$rootProject.hilt_version"
 }
 

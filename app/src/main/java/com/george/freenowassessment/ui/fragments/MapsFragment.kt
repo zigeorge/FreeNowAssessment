@@ -2,7 +2,6 @@ package com.george.freenowassessment.ui.fragments
 
 import android.annotation.SuppressLint
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -22,7 +21,6 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.BitmapDescriptor
 import com.google.android.gms.maps.model.LatLngBounds
-import com.google.android.gms.maps.model.Marker
 import com.google.maps.android.ktx.awaitMap
 import com.google.maps.android.ktx.awaitMapLoad
 import kotlinx.coroutines.flow.collectLatest
@@ -74,10 +72,10 @@ class MapsFragment : Fragment() {
     }
 
     /**
-     * collect allVehicles from [VehicleListViewModel]
+     * collect vehicleMarkers from [VehicleListViewModel]
      * */
     private suspend fun setAllVehiclesInMap() {
-        viewModel.allVehicles.collectLatest { vehicleMarkers ->
+        viewModel.vehicleMarkers.collectLatest { vehicleMarkers ->
             if(vehicleMarkers.isEmpty()) {
                 googleMap?.clear()
                 bounds = LatLngBounds.builder()
@@ -116,7 +114,7 @@ class MapsFragment : Fragment() {
      * vehicle is selected from [VehicleFragment]
      * */
     private suspend fun setMapToShowSelectedVehicle() {
-        viewModel.vehicleSelected.collect {
+        viewModel.selectedVehicle.collect {
             selectedVehicle = it
             it?.let {
                 // zooming the camera to selected vehicle

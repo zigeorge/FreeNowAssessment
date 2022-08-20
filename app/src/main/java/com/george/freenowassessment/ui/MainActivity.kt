@@ -50,7 +50,7 @@ class MainActivity : AppCompatActivity() {
         setupActionBarWithNavController(navController, appBarConfiguration)
 
         /** check for selected vehicle */
-        collectLifeCycleFlow(viewModel.vehicleSelected) { vehicleMarker ->
+        collectLifeCycleFlow(viewModel.selectedVehicle) { vehicleMarker ->
             vehicleMarker?.let {
                 binding.bottomNav.selectedItemId = R.id.mapsFragment
             }

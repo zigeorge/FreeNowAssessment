@@ -1,6 +1,8 @@
-package com.george.freenowassessment.repositories
+package com.george.freenowassessment
 
 import com.george.freenowassessment.data.local.Vehicle
+import com.george.freenowassessment.other.toJson
+import com.george.freenowassessment.ui.vo.Address
 import com.google.common.util.concurrent.AtomicDouble
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicLong
@@ -25,7 +27,7 @@ class VehicleFactory {
             vehicleId,
             latitude,
             longitude,
-            "Hamburg",
+            Address("Hamburg", "Hamburg").toJson(),
             "TAXI",
             "ACTIVE",
             "53.694865_9.757589_53.394655_10.099891",
