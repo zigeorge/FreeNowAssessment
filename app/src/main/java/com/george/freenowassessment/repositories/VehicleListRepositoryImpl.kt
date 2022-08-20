@@ -4,7 +4,6 @@ import androidx.paging.PagingSource
 import com.george.freenowassessment.data.local.Vehicle
 import com.george.freenowassessment.data.local.VehicleDao
 import com.george.freenowassessment.data.remote.responses.Coordinate
-import com.george.freenowassessment.other.Constants.ACTIVE
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
@@ -27,8 +26,7 @@ class VehicleListRepositoryImpl @Inject constructor(
         coordinate2: Coordinate
     ): PagingSource<Int, Vehicle> {
         return dao.vehiclesInPageSource(
-            coordinate1.toString() + coordinate2.toString(),
-            ACTIVE
+            coordinate1.toString() + coordinate2.toString()
         )
     }
 
@@ -37,8 +35,7 @@ class VehicleListRepositoryImpl @Inject constructor(
         coordinate2: Coordinate
     ): Flow<List<Vehicle>> {
         return dao.vehiclesInFlow(
-            coordinate1.toString() + coordinate2.toString(),
-            ACTIVE
+            coordinate1.toString() + coordinate2.toString()
         )
     }
 

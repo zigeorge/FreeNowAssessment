@@ -13,11 +13,11 @@ interface VehicleDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(vehicle: Vehicle)
 
-    @Query("SELECT * FROM vehicles WHERE bound = :bound AND state = :state")
-    fun vehiclesInPageSource(bound: String, state: String): PagingSource<Int, Vehicle>
+    @Query("SELECT * FROM vehicles WHERE bound = :bound")
+    fun vehiclesInPageSource(bound: String): PagingSource<Int, Vehicle>
 
-    @Query("SELECT * FROM vehicles WHERE bound = :bound AND state = :state")
-    fun vehiclesInFlow(bound: String, state: String): Flow<List<Vehicle>>
+    @Query("SELECT * FROM vehicles WHERE bound = :bound")
+    fun vehiclesInFlow(bound: String): Flow<List<Vehicle>>
 
     @Query("SELECT COUNT(id) FROM vehicles WHERE bound = :bound")
     fun count(bound: String): Int

@@ -1,7 +1,6 @@
 package com.george.freenowassessment.repositories
 
 import android.location.Geocoder
-import android.util.Log
 import com.george.freenowassessment.data.local.VehicleDao
 import com.george.freenowassessment.data.remote.VehicleApi
 import com.george.freenowassessment.data.remote.responses.Coordinate
@@ -42,7 +41,6 @@ class VehicleDataSource @Inject constructor(
                     coordinate2.latitude,
                     coordinate2.longitude
                 ).body()?.poiList ?: ArrayList()
-                Log.e("SIZE-API", list.size.toString())
                 val ids = ArrayList<Long>()
                 list.forEach {
                     ids.add(it.id)
@@ -53,11 +51,10 @@ class VehicleDataSource @Inject constructor(
                     if (count == 0) {
                         dao.insert(data.getVehicle(geocoder, bound))
                     } else {
-                        Log.e("UPDATE", "UPDATING DATA")
                         updateVehicles(data, bound)
                     }
                 }
-                delay(2000)
+                delay(20000)
             }
         }
     }

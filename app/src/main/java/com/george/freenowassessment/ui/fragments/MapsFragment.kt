@@ -2,7 +2,6 @@ package com.george.freenowassessment.ui.fragments
 
 import android.annotation.SuppressLint
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -82,12 +81,11 @@ class MapsFragment : Fragment() {
      * collect allVehicles from [VehicleListViewModel] and show them in [GoogleMap]
      * */
     private suspend fun setAllVehiclesInMap() {
-        viewModel.allVehicles.collectLatest { vehicleMarkers ->
+        viewModel.vehicleMarkers.collectLatest { vehicleMarkers ->
             if(vehicleMarkers.isEmpty()) {
                 googleMap?.clear()
                 markersMap.clear()
             } else {
-                Log.e("SIZE-MARKERS", markersMap.size.toString())
                 googleMap?.addMarkers(vehicleMarkers, markersMap, carIcon)
                     ?.let { markersMap.putAll(it) }
             }
@@ -126,7 +124,7 @@ class MapsFragment : Fragment() {
      * vehicle is selected from [VehicleFragment]
      * */
     private suspend fun setMapToShowSelectedVehicles() {
-        viewModel.vehicleSelected.collect {
+        viewModel.selectedVehicle.collect {
             it?.let {
                 // zooming the camera to selected vehicle
                 googleMap?.animateCamera(CameraUpdateFactory.newLatLngZoom(it.latLng, 20f))
@@ -141,7 +139,7 @@ class MapsFragment : Fragment() {
     * */
     private suspend fun checkMarkersIfExists() {
         while (true) {
-            delay(2000)
+            delay(10000)
             val removables = viewModel.getRemovableMarkers(markersMap.keys)
             lifecycleScope.launch(Dispatchers.Main) {
                 removables.forEach {

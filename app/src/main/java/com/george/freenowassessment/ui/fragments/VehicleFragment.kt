@@ -14,7 +14,6 @@ import com.george.freenowassessment.ui.VehicleListViewModel
 import com.george.freenowassessment.ui.adapters.VehicleRecyclerViewAdapter
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.launch
 
 /**
  * A fragment representing a list of VehicleData.
@@ -45,7 +44,7 @@ class VehicleFragment : Fragment(R.layout.fragment_vehicle) {
             adapter = vehicleRecyclerViewAdapter
         }
         lifecycleScope.launchWhenResumed {
-            viewModel.vehicleList.collectLatest {
+            viewModel.singleVehiclesList.collectLatest {
                 vehicleRecyclerViewAdapter.submitData(it)
             }
         }

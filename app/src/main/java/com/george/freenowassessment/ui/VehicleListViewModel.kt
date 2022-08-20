@@ -8,7 +8,6 @@ import com.george.freenowassessment.other.Constants.MAX_SIZE
 import com.george.freenowassessment.other.Constants.PAGE_SIZE
 import com.george.freenowassessment.other.Constants.coordinate1
 import com.george.freenowassessment.other.Constants.coordinate2
-import com.george.freenowassessment.other.DispatcherProvider
 import com.george.freenowassessment.other.toVehicleMarker
 import com.george.freenowassessment.repositories.VehicleListRepository
 import com.george.freenowassessment.ui.vo.SingleVehicle
@@ -27,13 +26,13 @@ class VehicleListViewModel @Inject constructor(
         getAllVehiclesToShowMarkerInMap()
     }
 
-    private val _allVehicles = MutableSharedFlow<List<VehicleMarker>>(replay = 5)
-    val allVehicles = _allVehicles.asSharedFlow()
+    private val _vehicleMarkers = MutableSharedFlow<List<VehicleMarker>>(replay = 5)
+    val vehicleMarkers = _vehicleMarkers.asSharedFlow()
 
-    private val _vehicleSelected = MutableStateFlow<VehicleMarker?>(null)
-    val vehicleSelected = _vehicleSelected.asStateFlow()
+    private val _selectedVehicleMarker = MutableStateFlow<VehicleMarker?>(null)
+    val selectedVehicle = _selectedVehicleMarker.asStateFlow()
 
-    val vehicleList: SharedFlow<PagingData<SingleVehicle>> = Pager(
+    val singleVehiclesList: SharedFlow<PagingData<SingleVehicle>> = Pager(
         config = PagingConfig(
             pageSize = PAGE_SIZE,
             enablePlaceholders = true,
@@ -62,7 +61,7 @@ class VehicleListViewModel @Inject constructor(
                 it.forEach { vehicle ->
                     vehicleMarkers.add(vehicle.toVehicleMarker())
                 }
-                _allVehicles.emit(vehicleMarkers)
+                _vehicleMarkers.emit(vehicleMarkers)
             }
         }
     }
@@ -70,13 +69,13 @@ class VehicleListViewModel @Inject constructor(
     fun onVehicleSelected(singleVehicle: SingleVehicle) {
         viewModelScope.launch {
             singleVehicle.let {
-                _vehicleSelected.value = it.vehicle.toVehicleMarker()
+                _selectedVehicleMarker.value = it.vehicle.toVehicleMarker()
             }
         }
     }
 
     fun removeVehicleSelection() {
-        _vehicleSelected.value = null
+        _selectedVehicleMarker.value = null
     }
 
     fun getRemovableMarkers(ids: Set<Long>): List<Long> {

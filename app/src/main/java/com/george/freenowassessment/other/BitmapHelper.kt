@@ -3,7 +3,6 @@ package com.george.freenowassessment.other
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
-import android.util.Log
 import androidx.annotation.ColorInt
 import androidx.annotation.DrawableRes
 import androidx.core.content.res.ResourcesCompat
@@ -24,7 +23,6 @@ object BitmapHelper {
     ): BitmapDescriptor {
         val vectorDrawable = ResourcesCompat.getDrawable(context.resources, id, null)
         if (vectorDrawable == null) {
-            Log.e("BitmapHelper", "Resource not found")
             return BitmapDescriptorFactory.defaultMarker()
         }
         val bitmap = Bitmap.createBitmap(
