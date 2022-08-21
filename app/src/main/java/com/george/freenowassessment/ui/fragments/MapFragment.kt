@@ -31,7 +31,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
-class MapsFragment : Fragment() {
+class MapFragment : Fragment() {
 
     private val viewModel by activityViewModels<VehicleListViewModel>()
 
@@ -121,7 +121,7 @@ class MapsFragment : Fragment() {
 
     /**
      * try to collect selectedVehicle from [VehicleListViewModel] if a specific
-     * vehicle is selected from [VehicleFragment]
+     * vehicle is selected from [VehiclesFragment]
      * */
     private suspend fun setMapToShowSelectedVehicles() {
         viewModel.selectedVehicle.collect {

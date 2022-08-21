@@ -8,6 +8,7 @@
     android:layout_height="match_parent"
     android:layout_marginLeft="16dp"
     android:layout_marginRight="16dp"
+    android:contentDescription="@string/cd_vehicle_list"
     app:layoutManager="LinearLayoutManager"
-    tools:context=".ui.fragments.VehicleFragment"
+    tools:context=".ui.fragments.VehiclesFragment"
     tools:listitem="@layout/fragment_vehicle" />

@@ -19,7 +19,7 @@ import kotlinx.coroutines.flow.collectLatest
  * A fragment representing a list of VehicleData.
  */
 @AndroidEntryPoint
-class VehicleFragment : Fragment(R.layout.fragment_vehicle) {
+class VehiclesFragment : Fragment(R.layout.fragment_vehicle) {
 
     private val vehicleRecyclerViewAdapter = VehicleRecyclerViewAdapter()
     private val viewModel by activityViewModels<VehicleListViewModel>()
@@ -48,7 +48,7 @@ class VehicleFragment : Fragment(R.layout.fragment_vehicle) {
                 vehicleRecyclerViewAdapter.submitData(it)
             }
         }
-        /** to clear selection from [VehicleListViewModel] when returned from [MapsFragment]*/
+        /** to clear selection from [VehicleListViewModel] when returned from [MapFragment]*/
         lifecycleScope.launchWhenResumed {
             viewModel.removeVehicleSelection()
         }

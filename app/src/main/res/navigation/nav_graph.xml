@@ -3,15 +3,15 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
-    app:startDestination="@id/vehicleFragment">
+    app:startDestination="@id/vehiclesFragment">
     <fragment
-        android:id="@+id/vehicleFragment"
-        android:name="com.george.freenowassessment.ui.fragments.VehicleFragment"
+        android:id="@+id/vehiclesFragment"
+        android:name="com.george.freenowassessment.ui.fragments.VehiclesFragment"
         android:label="@string/title_vehicle_list_fragment"
         tools:layout="@layout/vehicle_list_item" />
     <fragment
-        android:id="@+id/mapsFragment"
-        android:name="com.george.freenowassessment.ui.fragments.MapsFragment"
+        android:id="@+id/mapFragment"
+        android:name="com.george.freenowassessment.ui.fragments.MapFragment"
         android:label="@string/title_map"
         tools:layout="@layout/fragment_maps" />
 </navigation>

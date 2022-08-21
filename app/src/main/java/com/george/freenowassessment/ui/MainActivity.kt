@@ -21,7 +21,7 @@ import javax.inject.Inject
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
-    private lateinit var viewModel: VehicleListViewModel
+    lateinit var viewModel: VehicleListViewModel
 
     private lateinit var navController: NavController
     private lateinit var appBarConfiguration: AppBarConfiguration
@@ -45,14 +45,14 @@ class MainActivity : AppCompatActivity() {
 
         // Setup the ActionBar with navController and 3 top level destinations
         appBarConfiguration = AppBarConfiguration(
-            setOf(R.id.vehicleFragment, R.id.mapsFragment)
+            setOf(R.id.vehiclesFragment, R.id.mapFragment)
         )
         setupActionBarWithNavController(navController, appBarConfiguration)
 
         /** check for selected vehicle */
         collectLifeCycleFlow(viewModel.selectedVehicle) { vehicleMarker ->
             vehicleMarker?.let {
-                binding.bottomNav.selectedItemId = R.id.mapsFragment
+                binding.bottomNav.selectedItemId = R.id.mapFragment
             }
         }
 
