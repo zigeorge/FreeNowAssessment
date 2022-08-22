@@ -3,28 +3,28 @@ Android candidate test (Applicant Coding Challenge)
 
 Task 1
 -----
-Loading data from given [api] and show in a list
+Loading data from given [api] and showing them in a list.
 
 Task 2
 -----
 Implement a map Activity/Fragment with Google Maps. Show all available vehicles on the map. Use the bounds of the map to request the
 vehicles.
-The map should zoom and center on a specific vehicle when it is selected in the previously implemented list.
+The map should zoom in and center on a specific vehicle when it is selected in the previously implemented list.
 
 ## Project structure
 The project is structured following the guideline of [Android Architecture Components]. 
-The `ui` package contains `activity` and `fragments` which renders the data in screen and `viewModel` is used to contain and manage the state. 
-Additionally there is a `vo` package and `adapter` package which contains `ViewObject` and adapters.
-The `repositories` and `data` packages are part of data layer where `repositories` handles the business logic.
+The `ui` package contains `activity` and `fragments` which renders the data on the screen and `viewModel` is used to contain and manage the state. 
+Additionally there are `vo` and `adapter` packages which contain `ViewObject` and `adapters`.
+The `repositories` and `data` packages are part of the data layer where `repositories` handle the business logic.
 The `data` package contains `retrofit` client for API calls and `room` for local data storage and sync.
 To manage dependencies between components `dagger-hilt` is used and the module is kept in `di` package
-`other` package contains followings
-- [ConnectivityObserver][17] helps to observe connectivity.
-- [BitmapHelper][18] helps to draw marker from vector drawable. 
-- [Constants][19] constant object/values.
-- [Ext][20] extension functions or helper functions classes.
-`Clean` architecture and `SOLID` principle has been strictly maintain during the process of development.
-`Unit Test`, `Integration Test` and `E2E Testing` is also respectively implemented.
+`other` package contains the followings
+- [ConnectivityObserver][17] helps to observe connectivity
+- [BitmapHelper][18] helps to draw marker from vector drawable 
+- [Constants][19] constant object/values
+- [Ext][20] extension functions or helper functions
+`Clean` architecture and `SOLID` principle has been strictly maintain during the process of the development.
+`Unit Test`, `Integration Test` and `E2E Testing` has also been respectively implemented.
 
 ## Generic
 In [MainActivity][1] [Navigation Component] is used to host all the `fragments` in the `NavHostFragment`. 
@@ -35,26 +35,26 @@ A [Bottom Navigation View] is implemented so that user can easily navigate betwe
 [api] is implemented in [VehicleApi][12].
 
 ## Show useful vehicle information
-Here we have a JSON as API response which contains a list of vehicle information (id, coordinate, fleetType, state and heading)
-In [VehiclesFragment][2] list of all available vehicles as [SingleVehicle][7] is shown. Each list item contains the value of `type`, `address-line` and `state`
+Here, we have a JSON as API response which contains a list of vehicle information (id, coordinate, fleetType, state and heading)
+In the [VehiclesFragment][2], list of all available vehicles as [SingleVehicle][7] is shown. Each list item contains the value of `type`, `address-line` and `state`
 [GeoCoder] is used to convert all `Coordinate` from [VehicleData][13] into `address-line`
 The API often returns 100 or more vehicle information, hence, [paging-3] is used to slow loading the items in the list and provide a better user experience.
-[VehicleDao][15] provide access to `VehicleDB` which is used to store all new data from the list or update if change occurs in existing vehicle data.
-When the app is live it will request [api] every 20 seconds using a coroutine's `Dispatchers.IO` context.
+[VehicleDao][15] provides access to `VehicleDB` which is used to store all new data from the list or update if a change occurs in the existing vehicle data.
+When the app is live, it will request [api] every 20 seconds using coroutine's `Dispatchers.IO` context.
 [Kotlin Flow] is used for data streaming. Hence, with the change syncing in `vehicles` table, `paging-3` library have `PagingSource` API which maps data from `Flow` and stream it to [VehicleRecyclerViewAdapter][5] which is a `PagingDataAdapter`
-[VehicleListViewModel][4] holds the state of all data so that the list page survives the configuration change.
+[VehicleListViewModel][4] holds the state of all the data so that the list page survives the configuration changes.
 
-## Show all vehicle as marker in map
-In the [MapFragment][3] all vehicle is shown as markers. Here a `carIcon` is represented as custom marker which is created using [bitmap-helper]. 
-Response from the [VehicleApi][12] is fetched and mapped into `List` of [VehicleMarker][8] which is set on the map as marker according to their `LatLng`.
-All the basic gestures(e.g., zoom, pan) is enabled in map. When a [SingleVehicle][7] is selected from [VehiclesFragment][2] [MapFragment][3] open and zoomed in towards the selected [VehicleMarker][8].
-[MarkerInfoWindowAdapter][6] is used to show detail of a marker in the map when pressed.
+## Show all vehicle as markers in the map
+In the [MapFragment][3] all vehicle is shown as markers. Here, a `carIcon` is represented as custom marker which is created using [bitmap-helper]. 
+Response from the [VehicleApi][12] is fetched and mapped into `List` of [VehicleMarker][8] which is set on the map as markers according to their `LatLng`.
+All the basic gestures(e.g., zoom, pan) are enabled in the map. When a [SingleVehicle][7] is selected from [VehiclesFragment][2], [MapFragment][3] opens and zoom in towards the selected [VehicleMarker][8].
+[MarkerInfoWindowAdapter][6] is used to show the details of a marker in the map when tapped.
 
 ## Update data
-It occurred to me that the [VehicleApi][12] response is always changing, hence, I created [VehicleDataSource][10] to load data from API and then sync with [VehicleDB][16]. 
+It occurred to me that the [VehicleApi][12] response is always changing. Hence, I developed [VehicleDataSource][10] to load data from `API` and then sync with [VehicleDB][16]. 
 Upon receiving data from `API` the app is deleting all vehicle information that are not in the latest data set. Then, it updates any existing vehicle information and add new vehicle information in `VerhiclrDB`.
 `DELETE FROM vehicles WHERE vehicleId NOT IN (:list)` is the query to delete all vehicle information not in the latest data set.
-`VehicleDataSource` repeat the whole process every 20 seconds in a `Dispatchers.IO` coroutine context.
+`VehicleDataSource` repeats the whole process every 20 seconds in a `Dispatchers.IO` coroutine context.
 This enables zero loading time and a very neat user experience.
 
 ### Libraries
