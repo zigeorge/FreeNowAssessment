@@ -33,8 +33,8 @@ class MainActivityTest {
     @get:Rule
     var hiltRule = HiltAndroidRule(this)
 
-    @get:Rule
-    var instantTaskExecutorRule = InstantTaskExecutorRule()
+//    @get:Rule
+//    var instantTaskExecutorRule = InstantTaskExecutorRule()
 
     @get:Rule
     var activityScenarioRule = ActivityScenarioRule(MainActivity::class.java)
